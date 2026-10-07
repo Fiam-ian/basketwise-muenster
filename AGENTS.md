@@ -1,5 +1,16 @@
 # Contributor and agent instructions
 
+## Goal and continuity
+
+- Build the Münster-first open-source grocery planner: requested quantities, user-selected shops/radius, actual checkout cost and separately visible walking effort.
+- Continue the existing WSL prototype. Read docs/current-status.md, docs/decisions.md, docs/context-reconciliation.md and docs/pilot-gate.md; older Windows handoffs describe historical states.
+- The dependency-free stack is the current implementation choice, not a permanent production requirement. Do not change it without a concrete need.
+- Routine reversible development, checks and public source updates are authorized. Seek user input only for material scope, spending, privacy or public ownership changes; execution approval controls still apply.
+- Use bounded product/UX, data/provenance and architecture council reviews when useful. Assign distinct file ownership, exchange contracts and review invariant changes before integration. Old agent sessions are not inherited automatically.
+- Preserve newer Linux work over older briefing status. Never re-run migration or the initial new-repository publisher over an existing destination/repository.
+
+## Comparison and evidence rules
+
 - Preserve the separation between demo, active advertised offers and historical observations.
 - Never infer price validity from retrieval date or stock from an advertisement.
 - Use integer EUR cents, actual whole-pack purchases and separately displayed Pfand.
@@ -12,3 +23,9 @@
 - Keep implementation tasks in owned files and seek review for invariant changes.
 - No real receipts, personal locations, credentials or private shopping lists in Git.
 - Routine decisions are delegated; escalate material scope, paid services or privacy changes.
+- Keep checkout cost and walking effort separate; do not silently assign a monetary value to time.
+- Exact branch, product/pack, quantity basis, conditions and applicable Pfand need reviewed evidence before real basket comparison. Missing or ambiguous evidence remains excluded.
+- Historical estimates need an explicit shopping date/freshness policy, latest equivalent observation precedence and conflict exclusions. Observation dates and retrieval dates do not establish advertised validity.
+- Provider location/product/proof counts are diagnostics, not requested-line coverage, authenticated branches or independent shopping trips. Reviewed branch mappings are separate from the automatic inspector.
+- Route provider success does not verify access legs, opening hours or whole-trip walking eligibility. Keep price and route gates independent; failures must not silently become demo or geometric fallback.
+- Keep private brainstorm material and raw reports under ignored local-data. Persist sanitized decisions and provenance in docs; never publish a full private transcript automatically.

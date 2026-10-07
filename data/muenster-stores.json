@@ -55,5 +55,29 @@
     "Official addresses were verified through retrieved retailer pages; retrieved content may be cached.",
     "Coordinates, pedestrian entrances, opening hours for a shopping date, prices, stock and complete-basket coverage remain unverified.",
     "EDEKA branch 074602 is Hamannplatz 2, a different branch. Never substitute it for branch 074601."
+  ],
+  "reviewedProviderLocationMappings": [
+    {
+      "provider": "open-prices",
+      "providerLocationId": 6627,
+      "storeId": "lidl-friedrich-ebert-17",
+      "scope": "Public address identity only; price, product, file authenticity and route eligibility are not established",
+      "reviewedOn": "2026-10-07",
+      "reviewKind": "manual-public-address-cross-check",
+      "osm": {
+        "type": "WAY",
+        "id": 125838042,
+        "version": 17,
+        "timestamp": "2026-01-06T16:45:41Z",
+        "sourceUrl": "https://api.openstreetmap.org/api/0.6/way/125838042"
+      },
+      "officialSourceUrl": "https://www.lidl.de/s/de-DE/filialen/muenster/friedrich-ebert-str-17/",
+      "sourceAttribution": [
+        "Open Prices / Open Food Facts",
+        "OpenStreetMap contributors"
+      ],
+      "sourceDataLicence": "ODbL",
+      "evidenceDocument": "docs/branch-evidence.md"
+    }
   ]
 }

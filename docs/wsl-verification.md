@@ -34,3 +34,9 @@ scripts/publish-wsl.sh passed bash -n. Its real --check stopped because gh auth 
 ### Completed publication
 
 After local browser authentication, gh verified Fiam-ian over HTTPS. Authenticated --check passed all 96 tests and preview generation. --publish created the public repository and pushed main at b160d3aeefcfce844998e214340ac771b43f0362. The first GitHub Actions run succeeded: https://github.com/Fiam-ian/basketwise-muenster/actions/runs/37684660805. Release tracked paths contain no local-data, node_modules, .tools or .env entries. The retained checkout is /tmp/basketwise-release.l01YFV; the development workspace was preserved. Earlier publication-gate notes above describe the pre-authentication check.
+
+## Context reconciliation and bounded branch continuation
+
+The user-provided private structured briefing was copied byte-identically from Windows with exclusive creation; the source remained intact and Git check-ignore confirmed the Linux copy and reference are excluded. All council handoff documents were read, and recreated product/data/architecture roles reviewed the lasting decisions. Application modules, optimizer, preview, server and stylesheet bytes match the published source; no newer implementation was overwritten.
+
+The address-only registry now includes a separately reviewed provider-location mapping based on public OSM identity/address tags and the official retailer page. Its original three entries retain null coordinates and false routing eligibility. Registry JSON and mapping targets were checked. npm test passed all eight files after documentation/registry edits; the unchanged authored suite remains 96 tests. No additional browser run was needed for these non-UI changes.

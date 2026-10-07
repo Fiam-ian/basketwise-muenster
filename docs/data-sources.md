@@ -1,5 +1,7 @@
 # Data sources and truthful comparison
 
+Status note (2026-10-07 WSL continuation): execution-limit and pending-check statements below describe the original session. Native tests, bounded browser checks, raw-audit inspection and public source release subsequently completed; see [current status](current-status.md), [WSL verification](wsl-verification.md) and [context reconciliation](context-reconciliation.md). Live walking, real product/pack eligibility and current-price coverage remain gated.
+
 Research date: 7 October 2026 (Europe/Berlin). The prototype uses fictional shops and invented prices, marked **Synthetic demo fixture**. Coordinates illustrate the Münster area; they do not identify actual supermarket branches. Synthetic offers must never enter a real-price ranking.
 
 ## First provider boundary: Open Prices

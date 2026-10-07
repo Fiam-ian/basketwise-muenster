@@ -1,5 +1,7 @@
 # Verification record — 7 October 2026
 
+Status note (2026-10-07 WSL continuation): execution-limit and pending-check statements below describe the original session. Native tests, bounded browser checks, raw-audit inspection and public source release subsequently completed; see [current status](current-status.md), [WSL verification](wsl-verification.md) and [context reconciliation](context-reconciliation.md). Live walking, real product/pack eligibility and current-price coverage remain gated.
+
 ## Checks executed
 
 - Architecture agent: 29 optimizer and actual demo-fixture integration cases

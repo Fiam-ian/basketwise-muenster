@@ -36,10 +36,18 @@ choices are delegated. No paid services are used.
 6. Publish the tested source to a new public GitHub repository; never publish
    third-party price proofs or personal information without appropriate scope.
 
-## Known operational limits
+## Historical Windows operational limits
 
 The configured working directory uses /mnt/c/ paths while the desktop runtime
 reports Windows paths. exec_command cannot start a shell and node_repl rejects
 the sandbox working-directory URI. apply_patch can edit files. GitHub connector
 authentication succeeds but its exposed tools do not include repository creation.
 These are execution/capability limits, not requests for a new user permission.
+
+## WSL reconciliation and next slice
+
+The private original-chat briefing was reconciled with current work on 2026-10-07. Native WSL tests, bounded browser checks, retained-audit inspection and public GitHub source publication supersede the old operational limits above. See current-status.md and context-reconciliation.md. No optimizer invariant or public/private data boundary changed.
+
+Persist Münster-first scope, separate checkout cost and walking effort, bounded council review with distinct ownership and newer-evidence precedence. The dependency-free stack is the first-slice implementation, not a permanent technology mandate.
+
+Proceed to local historical product/pack eligibility diagnostics before enabling ranking. A reviewed public-address mapping for the single observed branch is recorded separately in branch-evidence.md. This does not supply reviewed product matches, current prices, stock, shop entrances or walking eligibility.
