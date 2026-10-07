@@ -57,3 +57,9 @@ Proceed to local historical product/pack eligibility diagnostics before enabling
 The CLI-only diagnostic is now implemented separately from the app and optimizer; see historical-eligibility.md. Its starter request carries six public staple demands, with all actual source records left unreviewed. Exact-byte report fingerprints bind local review files; supported identities, dates, source proof presence, pack quantities/basis, constraints, explicit merchandise price basis, discount conditions, membership and known Pfand gate eligibility. Newer coherent product observations suppress older ones; same-day conflicts fail closed. Candidate dates/ages are disclosed. Exact pack-unit equality is intentionally required in this first slice.
 
 The actual retained pilot reports zero eligible requested lines, not product absence or free items. Keep source evidence review as the next gate. No historical totals/ranking, browser import changes, receipt uploads, live routes or paid service were introduced.
+
+## Catalogue and real-data continuation
+
+Proceed with a curated catalogue and explicit acceptable substitutions, not a full market-inventory promise. The versioned product matcher treats requested milk attributes and brand as hard constraints and excludes unknown/unreviewed attributes. An offline SQLite projection separates product snapshots from location-specific historical observations; built-in Node SQLite is experimental and adds no external dependency. Database imports grant no evidence review or ranking eligibility.
+
+A broader 90-day bounded audit supplied 77 observations/71 product codes/four provider locations but no apparent complete two-supermarket starter basket. Additional evidence remains the limiting dependency. See product-catalog.md and real-data-roadmap.md for implemented boundaries and the conditional 5–11 engineer-day initial pilot estimate. Raw source material and databases remain ignored.

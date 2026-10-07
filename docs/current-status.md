@@ -49,3 +49,11 @@ The bounded continuation reviewed provider location 6627 → OSM WAY 125838042 �
 Next: perform and document source/product/pack reviews for the retained records before marking entries in the local draft reviewed. The diagnostic itself is implemented; see docs/historical-eligibility.md for exact constraints, quantity basis, historical precedence/conflicts, conditions and Pfand. Additional branch-specific price evidence and product/pack matching are needed before real basket ranking. One location, one proof and one observation date do not establish independent shopping trips, current prices or stock. Walking routing remains separate and unwired. Full screen-reader auditing, other browser engines and offline file-mode interaction remain unverified.
 
 Preserve fictional comparisons, historical evidence separation, integer cents, whole packs, separate Pfand, equivalent-demand merging and incomplete-basket exclusions. Never commit local-data or tool/browser artifacts.
+
+## Catalogue continuation
+
+Implemented the bounded product catalogue and explicit alternative matcher, including reviewed milk source/fat/processing/dietary attributes and hard brand requests. Implemented offline SQLite aggregation with separate product identities, report-bound metadata snapshots, location identities and dated observations. No browser or optimizer wiring changed. See product-catalog.md and real-data-roadmap.md.
+
+The bounded 90-day 3 km audit yielded 77 observations/71 product codes/four locations. Its private SQLite projection was created successfully with every review gate false. Candidate metadata does not provide the missing milk/eggs/tomatoes or complete comparable baskets at two supermarkets. This is historical source coverage, not current inventory. Additional reviewed evidence remains the next dependency. The conditional initial pilot estimate is 5–11 focused engineer-days assuming usable evidence; acquisition can take longer.
+
+Final native WSL verification passes 142 authored tests across twelve files, including SQLite privacy projection, snapshot preservation, exclusive output creation, nested identity fallbacks, conflict rejection and milk constraint exclusions. Node's built-in SQLite emits its expected experimental warning. No UI changes were made; the earlier browser verification remains the latest browser check.
