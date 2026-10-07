@@ -6,6 +6,8 @@ The machine-readable register is `data/source-registry.json`: 25 retailer/platfo
 
 ## Supermarkets and independent grocers
 
+For the compact Pluggendorf–Aasee branch pilot and its sequencing, see [neighbourhood-pilot.md](neighbourhood-pilot.md). The initial candidate branches are Rotthowe Aegidiimarkt, Wiewel Aaseemarkt, REWE Geiststraße (market 565814) and Netto Weseler Straße 109 (branch 6046). They are an explicit source test set, not a verified 1 km-radius census. REWE and Netto official branch pages expose public offer content, so test those before creating app accounts.
+
 | Retailer | Official Münster evidence / source | Current result |
 | --- | --- | --- |
 | REWE | [Roggenmarkt branch](https://www.rewe.de/marktseite/muenster/250486/rewe-markt-roggenmarkt-15-16/) | Branch offers exist; direct/browser 403 observed |
