@@ -1,0 +1,12 @@
+{
+  "version": "muenster-staples-v1",
+  "description": "Public starter request definition only; no product matches or prices are reviewed by this file.",
+  "items": [
+    { "id": "milk", "category": "milk", "quantity": 2000, "unit": "ml", "basis": "net", "brand": null, "requiredTags": [] },
+    { "id": "pasta", "category": "pasta", "quantity": 750, "unit": "g", "basis": "net", "brand": null, "requiredTags": [] },
+    { "id": "eggs", "category": "eggs", "quantity": 6, "unit": "count", "basis": "count", "brand": null, "requiredTags": [] },
+    { "id": "oats", "category": "oats", "quantity": 500, "unit": "g", "basis": "net", "brand": null, "requiredTags": [] },
+    { "id": "tomatoes", "category": "tomatoes", "quantity": 800, "unit": "g", "basis": "net", "brand": null, "requiredTags": [] },
+    { "id": "water", "category": "water", "quantity": 1500, "unit": "ml", "basis": "net", "brand": null, "requiredTags": [] }
+  ]
+}

@@ -29,3 +29,4 @@
 - Provider location/product/proof counts are diagnostics, not requested-line coverage, authenticated branches or independent shopping trips. Reviewed branch mappings are separate from the automatic inspector.
 - Route provider success does not verify access legs, opening hours or whole-trip walking eligibility. Keep price and route gates independent; failures must not silently become demo or geometric fallback.
 - Keep private brainstorm material and raw reports under ignored local-data. Persist sanitized decisions and provenance in docs; never publish a full private transcript automatically.
+- Historical eligibility diagnostics use an explicit versioned request and hash-pinned local review; manual review flags are unverified assertions. Keep these diagnostics separate from totals/ranking, disclose eligible candidate dates/ages and record exclusions. Do not turn unknown pack basis, discounts or Pfand into automatic matches.

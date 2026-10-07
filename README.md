@@ -63,6 +63,8 @@ Retailer adapters require source-specific reuse checks before automation.
 
 ## Privacy
 
+For a local historical product/pack eligibility diagnostic, run `npm run historical:audit -- --help` and follow [the review workflow](docs/historical-eligibility.md). It reports requested-line eligibility and exclusions; it supplies no real basket ranking or checkout estimate.
+
 Lists are saved in this browser when local storage is available. The demo has
 no accounts, analytics, remote price requests or location permission prompt.
 Do not commit personal locations, receipts, API tokens or real shopping lists.

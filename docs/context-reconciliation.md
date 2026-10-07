@@ -32,3 +32,7 @@ The next slice is a small local historical product/pack eligibility audit with e
 The bounded continuation established reviewed address identity for provider location 6627; see branch-evidence.md. This does not make its records basket-eligible. Keep coordinates, entrances, opening hours, stock, active validity and walking feasibility unverified until their respective checks pass.
 
 The original decision/source/verification documents remain chronological records. Current operational entry points are current-status.md and wsl-handoff.md. No application or optimizer behavior changed in this reconciliation.
+
+## Subsequent implementation
+
+The planned local eligibility slice is now implemented; see historical-eligibility.md. Its first actual retained-record run leaves all 22 observations unreviewed and reports zero covered requested lines. Source/product/pack/condition/deposit review remains necessary before enabling evidence coverage; historical totals/ranking are not implemented.

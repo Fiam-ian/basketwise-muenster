@@ -9,7 +9,8 @@
     "test": "node --test",
     "preview": "node scripts/build-preview.mjs",
     "coverage:audit": "node scripts/audit-coverage.mjs",
-    "coverage:inspect": "node scripts/inspect-coverage.mjs"
+    "coverage:inspect": "node scripts/inspect-coverage.mjs",
+    "historical:audit": "node scripts/audit-historical.mjs"
   },
   "engines": {
     "node": ">=22"

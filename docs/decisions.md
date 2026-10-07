@@ -51,3 +51,9 @@ The private original-chat briefing was reconciled with current work on 2026-10-0
 Persist Münster-first scope, separate checkout cost and walking effort, bounded council review with distinct ownership and newer-evidence precedence. The dependency-free stack is the first-slice implementation, not a permanent technology mandate.
 
 Proceed to local historical product/pack eligibility diagnostics before enabling ranking. A reviewed public-address mapping for the single observed branch is recorded separately in branch-evidence.md. This does not supply reviewed product matches, current prices, stock, shop entrances or walking eligibility.
+
+## Historical eligibility diagnostic implementation
+
+The CLI-only diagnostic is now implemented separately from the app and optimizer; see historical-eligibility.md. Its starter request carries six public staple demands, with all actual source records left unreviewed. Exact-byte report fingerprints bind local review files; supported identities, dates, source proof presence, pack quantities/basis, constraints, explicit merchandise price basis, discount conditions, membership and known Pfand gate eligibility. Newer coherent product observations suppress older ones; same-day conflicts fail closed. Candidate dates/ages are disclosed. Exact pack-unit equality is intentionally required in this first slice.
+
+The actual retained pilot reports zero eligible requested lines, not product absence or free items. Keep source evidence review as the next gate. No historical totals/ranking, browser import changes, receipt uploads, live routes or paid service were introduced.

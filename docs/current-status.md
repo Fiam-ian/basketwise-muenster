@@ -19,7 +19,7 @@ npm run dev
 
 ## Completed in WSL
 
-- Fixed three optimizer tests accidentally nested inside the demo/real separation test. All 96 authored tests now pass when executed directly, with no failures or cancellations. npm test passes all eight test files. Comparison logic and invariants were unchanged.
+- Fixed three optimizer tests accidentally nested inside the demo/real separation test. The initial WSL verification passed 96 authored tests with no failures or cancellations. The later historical eligibility slice brings the current suite to 124 passing tests across ten files. Comparison logic and invariants were unchanged.
 - Rebuilt preview.html from canonical modules.
 - Inspected the actual retained 3 km audit: 22 distinct observations, one location ID (6627), one distinct proof, all dates 2026-09-26; no missing/conflicting identity counters. Allowlisted provider metadata labels it Lidl, Münster 48153, OSM way 125838042. Automatic inspector metadata alone did not authenticate the branch; the subsequent manual address mapping is documented below.
 - Compared both retained audits in memory: provider record ID sets and raw provider records are identical. Observation wrappers differ only in capturedAt. No receipts, owners, proof IDs/images or prices were written into public evidence.
@@ -27,6 +27,10 @@ npm run dev
 - Added a favicon after the initial browser reported a favicon 404. Updated server returns it successfully; final app check reports no console/page errors. Server rejects local-data requests with 404.
 - Added scripts/publish-wsl.sh: authenticated checks by default; --publish copies allowlisted source assets into a retained temporary Git checkout before creating/pushing the public repository. The working checkout is preserved. Fixed publish.ps1 omission of index.html/styles.css; both publishers include the favicon.
 - Publisher Bash syntax and authenticated --check passed. The --publish path created and pushed the public source repository successfully.
+
+- Added the separate local historical product/pack eligibility engine, hash-pinned review draft/audit CLI, six-line public starter request and aggregate date/age/exclusion reports. It computes no totals and enables no rankings.
+- The actual 22-record audit with all record reviews false produces zero eligible lines out of six at the reviewed branch. Unreviewed candidates are not product absence. Draft and results remain ignored in local-data/historical-review-v1.json and local-data/historical-eligibility-v2.json; older output was preserved.
+- Product and data council reviews identified and resolved strict record/discount/source identity gates and eligible-date disclosure. The final native WSL suite passes 124 tests with zero failures/cancellations. The CLI subprocess error-capture test required native execution outside the sandbox; the app source and prior browser behavior are unchanged.
 
 Details: docs/wsl-verification.md. Browser artifacts are ignored under output/playwright at the workspace root. Temporary browser tooling/libraries are under /tmp and may disappear; project-local Node and gh persist.
 
@@ -42,6 +46,6 @@ Publication is source-only: no hosted website or live price comparison was deplo
 
 The bounded continuation reviewed provider location 6627 → OSM WAY 125838042 → Lidl Friedrich-Ebert-Straße 17 against OSM address tags and the official retailer page. See docs/branch-evidence.md and data/muenster-stores.json; this separate manual mapping does not change the inspector’s unverified-metadata output or routing eligibility.
 
-Next: a small local requested-line product/pack eligibility audit, with exact constraints, quantity basis, historical precedence/conflicts, conditions and Pfand. Additional branch-specific price evidence and product/pack matching are needed before real basket ranking. One location, one proof and one observation date do not establish independent shopping trips, current prices or stock. Walking routing remains separate and unwired. Full screen-reader auditing, other browser engines and offline file-mode interaction remain unverified.
+Next: perform and document source/product/pack reviews for the retained records before marking entries in the local draft reviewed. The diagnostic itself is implemented; see docs/historical-eligibility.md for exact constraints, quantity basis, historical precedence/conflicts, conditions and Pfand. Additional branch-specific price evidence and product/pack matching are needed before real basket ranking. One location, one proof and one observation date do not establish independent shopping trips, current prices or stock. Walking routing remains separate and unwired. Full screen-reader auditing, other browser engines and offline file-mode interaction remain unverified.
 
 Preserve fictional comparisons, historical evidence separation, integer cents, whole packs, separate Pfand, equivalent-demand merging and incomplete-basket exclusions. Never commit local-data or tool/browser artifacts.
