@@ -84,6 +84,6 @@ Initial tests and UI verification are recorded separately in
 docs/verification.md and docs/wsl-verification.md. The WSL run passed all 96 authored tests and bounded real Chromium checks. Do not interpret a written test suite as a completed
 Node test run or a static review as a browser test.
 
-## WSL release
+## WSL development and release
 
-See docs/wsl-handoff.md for the project-local runtime PATH. Authenticate GitHub CLI as Fiam-ian, then run bash scripts/publish-wsl.sh --check. Use --publish to create and push the already-authorized public repository from an allowlisted temporary checkout. Local audit evidence stays excluded. Authentication and the public push remain pending.
+See docs/wsl-handoff.md for the project-local runtime PATH. Source is published at https://github.com/Fiam-ian/basketwise-muenster and the first GitHub Actions test run passed. Local audit evidence and tools are excluded. The initial publisher, scripts/publish-wsl.sh, creates a new repository; use normal commits and pushes from a clone for subsequent updates.

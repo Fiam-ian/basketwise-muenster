@@ -13,12 +13,6 @@ npm run dev
 
 This project-local PATH avoids global installation. Read docs/current-status.md for the latest completed checks and outstanding work.
 
-For the authorized release, authenticate GitHub CLI locally as Fiam-ian, then run:
+The source is published at https://github.com/Fiam-ian/basketwise-muenster and the first GitHub Actions test run passed. GitHub CLI is authenticated as Fiam-ian.
 
-```bash
-gh auth login
-bash scripts/publish-wsl.sh --check
-bash scripts/publish-wsl.sh --publish
-```
-
-The publisher retains its allowlisted snapshot in a temporary checkout and preserves this development workspace. Authentication is currently missing; no public repository or push was completed.
+The release Git checkout is /tmp/basketwise-release.l01YFV; this working workspace was preserved. Future updates should use that checkout or a separate clone of the published repository. scripts/publish-wsl.sh --publish creates a new repository and must not be reused for ordinary updates to the existing repository. See docs/current-status.md for release evidence and outstanding data/routing work.

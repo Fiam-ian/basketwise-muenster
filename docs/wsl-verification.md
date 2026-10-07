@@ -30,3 +30,7 @@ Ignored artifacts: workspace output/playwright/desktop-final.png, desktop.png, m
 ## Publication
 
 scripts/publish-wsl.sh passed bash -n. Its real --check stopped because gh auth status reports no authenticated hosts. Public snapshot creation/commit/push and GitHub CI are unexecuted. The script includes index.html, styles.css and favicon.svg, which are also now included by the Windows publisher. Source snapshots exclude local-data and project tool/browser artifacts.
+
+### Completed publication
+
+After local browser authentication, gh verified Fiam-ian over HTTPS. Authenticated --check passed all 96 tests and preview generation. --publish created the public repository and pushed main at b160d3aeefcfce844998e214340ac771b43f0362. The first GitHub Actions run succeeded: https://github.com/Fiam-ian/basketwise-muenster/actions/runs/37684660805. Release tracked paths contain no local-data, node_modules, .tools or .env entries. The retained checkout is /tmp/basketwise-release.l01YFV; the development workspace was preserved. Earlier publication-gate notes above describe the pre-authentication check.

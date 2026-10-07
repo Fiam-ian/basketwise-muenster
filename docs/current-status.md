@@ -26,15 +26,17 @@ npm run dev
 - Real headless Chromium rendered desktop and 390-pixel mobile layouts; inspected screenshots and accessibility snapshots. Audit selection, clearing, malformed JSON, keyboard clear, duplicate-demand merging and unchanged fictional baskets passed. Import caused zero network requests and left no raw audit records in localStorage. Mobile layout had no horizontal overflow.
 - Added a favicon after the initial browser reported a favicon 404. Updated server returns it successfully; final app check reports no console/page errors. Server rejects local-data requests with 404.
 - Added scripts/publish-wsl.sh: authenticated checks by default; --publish copies allowlisted source assets into a retained temporary Git checkout before creating/pushing the public repository. The working checkout is preserved. Fixed publish.ps1 omission of index.html/styles.css; both publishers include the favicon.
-- Publisher Bash syntax passed. Its real --check execution stopped at the missing GitHub authentication gate before publication.
+- Publisher Bash syntax and authenticated --check passed. The --publish path created and pushed the public source repository successfully.
 
 Details: docs/wsl-verification.md. Browser artifacts are ignored under output/playwright at the workspace root. Temporary browser tooling/libraries are under /tmp and may disappear; project-local Node and gh persist.
 
 ## Remaining actions
 
-WSL GitHub CLI is not authenticated. The user must authenticate locally as Fiam-ian; do not request or store a token in chat. With the PATH above, run gh auth login, then bash scripts/publish-wsl.sh --check and bash scripts/publish-wsl.sh --publish. Public release is already authorized. No repository creation, push or CI run has been completed. Intended repository: Fiam-ian/basketwise-muenster.
+GitHub CLI is now authenticated as Fiam-ian over HTTPS. Public source repository: https://github.com/Fiam-ian/basketwise-muenster (main). Initial release commit: b160d3aeefcfce844998e214340ac771b43f0362. The first GitHub Actions run passed: https://github.com/Fiam-ian/basketwise-muenster/actions/runs/37684660805.
 
-The source publisher is syntax-checked and its authentication stop is verified; its authenticated snapshot/commit/push path remains unexecuted. PowerShell publisher edits were not executed in WSL.
+The retained Git release checkout is /tmp/basketwise-release.l01YFV. This workspace was preserved and still has its original parent Git metadata; do not assume its prototype directory is the published Git checkout. For later source updates use the retained release checkout, or clone the public repository into a separate development directory if the temporary checkout disappears. The new-repository publisher is for initial creation; do not rerun --publish against the existing repository. PowerShell publisher edits remain unexecuted in WSL.
+
+Publication is source-only: no hosted website or live price comparison was deployed. Tracked release paths were checked and contain no local-data, node_modules, .tools or .env entries.
 
 Additional branch-specific evidence and product/pack matching are needed before real basket ranking. One location, one proof and one observation date do not establish independent shopping trips, current prices or stock. Walking routing remains separate and unwired. Full screen-reader auditing, other browser engines and offline file-mode interaction remain unverified.
 
