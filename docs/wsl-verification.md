@@ -1,0 +1,32 @@
+# WSL verification — 7 October 2026
+
+Runtime: WSL2 Ubuntu 24.04, native Linux Node 22.23.3. Tools were downloaded and extracted locally; system packages were unchanged.
+
+## Canonical tests
+
+npm test passed all eight test files. Direct Node execution counted 96 authored tests: audit CLI 6, audit view 16, coverage 5, inspector 5, provider 8, optimizer 29, routing 21, UI smoke 6. Zero failures or cancellations. The first WSL run exposed three accidentally nested optimizer tests; moving their existing bodies to the top level resolved Node cancellations without altering engine code. Final npm test passed after favicon and publisher edits. npm run preview regenerated the offline snapshot.
+
+## Retained evidence
+
+The privacy-conscious inspector found 22 distinct observations, location 6627, one distinct proof, all dated 2026-09-26. Its allowlisted provider metadata says Lidl, Münster 48153, OSM way 125838042; this is an unverified provider label. Missing and conflicting identity counters were zero. The 3 km and 10 km reports have identical raw records and record ID sets; only capturedAt differs in their observation wrappers. Comparisons occurred in memory, without printing raw records or writing another evidence copy.
+
+This does not establish current prices, stock, branch authentication, independent visits or full-basket coverage.
+
+## Real browser and HTTP
+
+Playwright CLI 0.1.22 drove headless Chromium 155.0.8059.12, using temporary locally extracted libnspr4/libnss3. Desktop and mobile screenshots were visually inspected; the accessibility snapshot exposed named controls and live status regions. At 390 × 844, the layout had no horizontal overflow.
+
+Verified:
+
+- Initial fictional basket renders three complete options.
+- Selecting the actual retained audit displays recomputed 22-record/one-location/22-product counters.
+- Import does not alter fictional basket results, makes zero network requests, and does not store raw audit records in localStorage.
+- Mouse and keyboard clearing remove audit output; malformed JSON leaves no aggregate summary and shows the supported-format error.
+- Adding another 750 g pasta demand produces one 1500 g demand.
+- Canonical HTTP modules load. Favicon returns 200; local-data URL returns 404. Final browser visit has zero page/console errors.
+
+Ignored artifacts: workspace output/playwright/desktop-final.png, desktop.png, mobile.png and CLI snapshots. These contain demonstration UI and audit aggregates, not raw receipts. Screenshot checks are bounded visual review, not a full accessibility audit. Other engines, screen readers and offline file-mode interaction were not tested.
+
+## Publication
+
+scripts/publish-wsl.sh passed bash -n. Its real --check stopped because gh auth status reports no authenticated hosts. Public snapshot creation/commit/push and GitHub CI are unexecuted. The script includes index.html, styles.css and favicon.svg, which are also now included by the Windows publisher. Source snapshots exclude local-data and project tool/browser artifacts.

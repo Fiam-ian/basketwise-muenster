@@ -1,0 +1,17 @@
+{
+  "name": "muenster-grocery-planner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Honest basket comparisons for a Münster grocery-planning pilot",
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "test": "node --test",
+    "preview": "node scripts/build-preview.mjs",
+    "coverage:audit": "node scripts/audit-coverage.mjs",
+    "coverage:inspect": "node scripts/inspect-coverage.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

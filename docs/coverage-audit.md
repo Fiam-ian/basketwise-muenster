@@ -1,0 +1,26 @@
+# Bounded historical coverage audit
+
+Run from the prototype directory in a working Node runtime:
+
+```sh
+node scripts/audit-coverage.mjs --out /path/to/new-local-audit.json
+node scripts/audit-coverage.mjs --out /path/to/another-new-audit.json --lat 51.96236 --lon 7.62571 --radius-km 3 --since 2026-09-24
+```
+
+`--out` is mandatory and must name a new JSON file. After checking that the output does not exist, the CLI creates missing parent directories before querying; a file in place of a parent directory fails before retrieval. Exclusive file creation prevents overwriting a previous audit, including if another process creates that path during retrieval. Raw records stay in the audit file; do not commit them. No proof images are downloaded. Provider metadata and proof URLs already present in JSON remain intact.
+
+The explicit default geographic centre is latitude 51.96236, longitude 7.62571, with a 3 km radius. It is an illustrative public Münster city-centre point, not a personal location. The default recent window comprises fourteen calendar dates including today's reference date in Europe/Berlin, determined with `Intl.DateTimeFormat` independently of the host timezone. On 7 October 2026 the default lower bound is 24 September 2026. The CLI records its actual reference date, timezone basis and lower query bound. An explicit `--since` changes retrieval, while summary freshness remains a fourteen-day comparison to the recorded reference date. The provider query has no upper-date filter; future-dated records are counted separately rather than accepted as recent.
+
+The pure summary uses UTC midnight arithmetic on the supplied calendar date to avoid daylight-saving-hour differences; that arithmetic does not choose the reference timezone. The CLI supplies the Europe/Berlin date. A future estimate for a planned shopping trip must use the user's selected shopping date explicitly rather than infer it from this audit.
+
+Retrieval is bounded to three pages of 100 records (at most 300 retained records), using the [documented price-list API](https://openfoodfacts.github.io/documentation/docs/Open-prices/prices/prices_list/). It reports provider total and truncation separately. Counts in a truncated response are counts of the retrieved subset, not all records in Münster. Failure exits unsuccessfully and does not produce an apparently successful empty audit.
+
+The pure summary reports observed record count, distinct provider record IDs, duplicates, distinct provider location IDs, distinct product codes, observed date bounds, recent/older/future/missing/invalid dates, and missing comparison-relevant fields. Missing product codes can reflect category prices rather than defective provider data; they still cannot establish product-specific matches. Presence of price, currency, quantity, proof or location metadata alone does not validate their values or verify branch applicability.
+
+These counts do **not** establish a complete grocery basket, product equivalence, current advertised validity, checkout total, store stock or walkable routes. Receipt and shelf-label dates are historical observations. Location IDs must be mapped to verified branches; product amounts and units must be reviewed; shopping-list constraints and per-branch item coverage require another audit before current comparisons are claimed. Imported data retains Open Prices / Open Food Facts attribution and ODbL provenance; our code license does not relicense it. See [data-source research](data-sources.md).
+
+Before a future historical basket mode is enabled, use deterministic latest-observation precedence for the same verified branch, product, pack and conditions, with documented timestamp precision. Never select a cheaper older observation over newer evidence for that identity. Conflicting prices at the same identity and observation time must be flagged for review or excluded; date-only evidence cannot infer a within-day order. This audit preserves observations and reports duplicate IDs but does not resolve price conflicts or calculate historical basket totals.
+
+Node CLI execution and live geographic coverage are currently unverified because the execution environment could not start shell/Node tools. Five authored summary test callbacks with twenty assertions passed in the V8 tool environment using retained authored source and minimal test/assert shims, covering date categories and boundaries, missing fields, distinct identities, duplicates, preservation of originals and invalid inputs. Those checks do not verify networking or filesystem behavior. The Node test file remains available for execution in a repaired runtime.
+
+The authored CLI bodies, including parent-directory creation, also passed equivalent preflight/output checks in V8 with in-memory filesystem/path/provider stubs: missing and invalid arguments, existing output preservation, parent-is-file failure, new nested output with provenance, refused rerun, and exclusive-write handling of a concurrent output. Invalid preflights made zero provider calls. `tests/audit-cli.test.mjs` provides five sequential Node subtests with mocked fetch and an isolated temporary directory, including an import-entrypoint check; that Node suite has not yet run in an actual filesystem runtime.

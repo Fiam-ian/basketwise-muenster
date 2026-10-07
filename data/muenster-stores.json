@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "city": "Münster",
+  "region": "NRW",
+  "sourceCheckedOn": "2026-10-07",
+  "status": "Address-only source registry; not wired into demonstration comparisons",
+  "stores": [
+    {
+      "id": "rewe-250486",
+      "chain": "REWE",
+      "name": "REWE Roggenmarkt",
+      "address": {
+        "street": "Roggenmarkt 15–16",
+        "postalCode": "48143",
+        "city": "Münster"
+      },
+      "sourceUrl": "https://www.rewe.de/marktseite/muenster/250486/rewe-markt-roggenmarkt-15-16/",
+      "coordinates": null,
+      "coordinatesVerified": false,
+      "hoursVerifiedForShoppingDate": false,
+      "eligibleForRouting": false
+    },
+    {
+      "id": "edeka-074601",
+      "chain": "EDEKA",
+      "name": "EDEKA Rotthowe Aegidiimarkt",
+      "address": {
+        "street": "Aegidiimarkt 7",
+        "postalCode": "48143",
+        "city": "Münster"
+      },
+      "sourceUrl": "https://www.edeka.de/maerkte/074601/",
+      "coordinates": null,
+      "coordinatesVerified": false,
+      "hoursVerifiedForShoppingDate": false,
+      "eligibleForRouting": false
+    },
+    {
+      "id": "lidl-friedrich-ebert-17",
+      "chain": "Lidl",
+      "name": "Lidl Friedrich-Ebert-Straße",
+      "address": {
+        "street": "Friedrich-Ebert-Str. 17",
+        "postalCode": "48153",
+        "city": "Münster"
+      },
+      "sourceUrl": "https://www.lidl.de/s/de-DE/filialen/muenster/friedrich-ebert-str-17/",
+      "coordinates": null,
+      "coordinatesVerified": false,
+      "hoursVerifiedForShoppingDate": false,
+      "eligibleForRouting": false
+    }
+  ],
+  "limitations": [
+    "Official addresses were verified through retrieved retailer pages; retrieved content may be cached.",
+    "Coordinates, pedestrian entrances, opening hours for a shopping date, prices, stock and complete-basket coverage remain unverified.",
+    "EDEKA branch 074602 is Hamannplatz 2, a different branch. Never substitute it for branch 074601."
+  ]
+}

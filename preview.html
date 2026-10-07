@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#16392f">
+    <meta name="description" content="An open-source grocery basket comparison prototype for Münster, with clearly labelled fictional demonstration data.">
+    <title>Basketwise · Münster grocery planner</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Basketwise home"><span class="brand-mark" aria-hidden="true">b.</span><span>basketwise<span class="brand-sub">MÜNSTER PILOT</span></span></a>
+      <span class="header-note">A better basket, a shorter trip.</span>
+      <span class="demo-pill">OFFLINE DEMO</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">YOUR LIST. YOUR NEIGHBOURHOOD.</p>
+        <h1 id="page-title">Make your next<br>grocery run <span>go further.</span></h1>
+        <p class="intro-copy">Compare the cost of your whole basket, then decide how far you want to go.</p>
+      </section>
+      <aside class="demo-notice" aria-label="Demonstration data notice"><span aria-hidden="true">◌</span><p><strong>This is a demonstration, not current supermarket pricing.</strong> All stores and offers are fictional. Distances are straight-line estimates, not walking routes. Advertised prices never guarantee stock.</p></aside>
+      <div class="workspace">
+        <div class="planning-column">
+          <section class="panel list-panel" aria-labelledby="list-title">
+            <div class="panel-heading"><div><p class="eyebrow">01 / BUILD YOUR BASKET</p><h2 id="list-title">Your shopping list</h2></div><span id="item-count" class="count-pill"></span></div>
+            <form id="add-form" class="add-form"><label class="sr-only" for="catalog-select">Grocery item</label><select id="catalog-select"></select><button class="button button-primary" type="submit">+ Add item</button></form>
+            <div id="shopping-items"></div>
+            <p class="quiet-note">Quantities describe what you need. Results include the whole packs you would actually buy.</p>
+          </section>
+          <section class="panel" aria-labelledby="trip-title">
+            <div class="panel-heading"><div><p class="eyebrow">02 / SET YOUR LIMITS</p><h2 id="trip-title">Make it your kind of trip</h2></div></div>
+            <div class="control-grid">
+              <label class="field">Shopping date<input id="shopping-date" type="date" required></label>
+              <label class="field">Maximum shops<select id="max-stores"><option value="1">One shop</option><option value="2">Up to two shops</option></select></label>
+            </div>
+            <label class="range-field" for="radius"><span>Search radius <strong id="radius-value"></strong></span><input id="radius" type="range" min="500" max="5000" step="250"><small>Straight-line distance from your starting point to each shop.</small></label>
+            <label class="range-field" for="walking-minutes"><span>Round-trip time budget <strong id="walking-value"></strong></span><input id="walking-minutes" type="range" min="10" max="120" step="5"><small>Estimated at 80 metres per minute, including your return. Streets and barriers are not included.</small></label>
+            <label class="checkbox-field"><input id="allow-membership" type="checkbox"><span>Include membership-only prices <small>Enable only if you meet the offer conditions.</small></span></label>
+            <details class="origin-settings"><summary id="origin-summary">Starting point · central Münster</summary><p class="quiet-note">The default is a public city-centre point. Change the coordinates to explore another start. No location is requested or sent to a server.</p><div class="control-grid"><label class="field">Latitude<input id="origin-lat" type="number" min="-90" max="90" step="any"></label><label class="field">Longitude<input id="origin-lon" type="number" min="-180" max="180" step="any"></label></div></details>
+          </section>
+          <p class="local-note">Your list stays in this browser when local storage is available. No account. No trackers.</p>
+        </div>
+        <section class="results-column" aria-labelledby="results-title">
+          <div class="results-heading"><div><p class="eyebrow">03 / FIND YOUR FIT</p><h2 id="results-title">Your basket, compared</h2></div><span class="live-indicator">Updates as you edit</span></div>
+          <div id="results-summary" class="results-summary" role="status" aria-live="polite"></div>
+          <div id="comparison-results"></div>
+          <div id="partial-results"></div>
+          <section class="panel audit-panel" aria-labelledby="audit-title">
+            <div class="panel-heading"><div><p class="eyebrow">LOCAL EVIDENCE / INSPECTION ONLY</p><h2 id="audit-title">Read your price audit</h2></div><span class="card-badge">Local only</span></div>
+            <p class="audit-intro">Open an audit JSON from your local-data folder to inspect historical observation counts and dates. This does not add real prices to the fictional basket comparison.</p>
+            <label class="field" for="audit-file">Choose a local audit JSON<input id="audit-file" type="file" accept=".json,application/json"></label>
+            <p class="quiet-note">Up to 2 MiB and 300 observations. The file stays on your device, is never uploaded or saved by this app, and receipt images, proof links and owner details are not displayed.</p>
+            <p id="audit-status" class="audit-status" role="status" aria-live="polite">Select a local audit JSON to view its evidence profile.</p>
+            <div id="audit-summary"></div>
+            <button id="audit-clear" class="button audit-clear" type="button" hidden>Clear inspection</button>
+          </section>
+          <aside class="how-it-works"><p class="eyebrow">A LITTLE CLARITY</p><h3>A cheap basket should be a complete basket.</h3><p>We compare eligible whole-pack purchases using one product per required item. Equivalent duplicate list items are combined. Mixing different pack sizes or products for the same item is outside this prototype's comparison. Missing items never count as free. Refundable Pfand is included in checkout totals and shown separately.</p><p>This prototype uses fictional prices and straight-line trip estimates. A future live comparison will need verified sources and walking routes.</p></aside>
+        </section>
+      </div>
+    </main>
+    <footer><span>Basketwise · Built for a more considered grocery run.</span><span>Offline preview snapshot · Münster, NRW</span></footer>
+    <script>
+(() => {
+const demo = (() => {
+// Synthetic prices and fictional shops. Never merge this fixture with provider observations.
+const defaultOrigin = { lat: 51.96236, lon: 7.62571, label: 'Illustrative Münster city-centre starting point' };
+
+const stores = [
+  { id: 'demo-a', name: 'Demo · Corner Basket', lat: 51.9658, lon: 7.6225 },
+  { id: 'demo-b', name: 'Demo · Everyday Market', lat: 51.9570, lon: 7.6350 },
+  { id: 'demo-c', name: 'Demo · Pantry Place', lat: 51.9760, lon: 7.6090 },
+  { id: 'demo-d', name: 'Demo · Green Grocer', lat: 51.9430, lon: 7.6410 },
+];
+
+const catalog = [
+  { category: 'milk', label: 'Milk', unit: 'ml', defaultQuantity: 2000 },
+  { category: 'pasta', label: 'Pasta', unit: 'g', defaultQuantity: 750 },
+  { category: 'eggs', label: 'Eggs', unit: 'count', defaultQuantity: 6 },
+  { category: 'oats', label: 'Oats', unit: 'g', defaultQuantity: 500 },
+  { category: 'tomatoes', label: 'Tinned tomatoes', unit: 'g', defaultQuantity: 800 },
+  { category: 'water', label: 'Mineral water', unit: 'ml', defaultQuantity: 1500 },
+];
+
+const makeOffer = (storeId, category, packQuantity, unit, priceCents, options = {}) => ({
+  id: `${storeId}-${category}-${options.suffix ?? 'standard'}`,
+  category,
+  productName: options.productName ?? `Demo ${catalog.find(item => item.category === category).label}`,
+  brand: options.brand ?? 'Demo Standard',
+  packQuantity,
+  unit,
+  quantityBasis: unit === 'count' ? 'count' : 'net',
+  priceCents,
+  depositCents: options.depositCents ?? 0,
+  storeIds: [storeId],
+  validFrom: '2020-01-01',
+  validTo: '2099-12-31',
+  priceKind: 'demo',
+  requiresMembership: options.requiresMembership ?? false,
+  tags: options.tags ?? [],
+  branchScopeVerified: true,
+  matchReviewed: true,
+  source: { label: 'Synthetic demo fixture', url: null, reviewed: true },
+});
+
+const offers = [
+  makeOffer('demo-a', 'milk', 1000, 'ml', 115),
+  makeOffer('demo-a', 'pasta', 500, 'g', 99, { tags: ['vegan'] }),
+  makeOffer('demo-a', 'eggs', 6, 'count', 219),
+  makeOffer('demo-a', 'oats', 500, 'g', 89, { tags: ['vegan'] }),
+  makeOffer('demo-a', 'tomatoes', 400, 'g', 85, { tags: ['vegan'] }),
+  makeOffer('demo-a', 'water', 1500, 'ml', 49, { depositCents: 25, tags: ['vegan'] }),
+  makeOffer('demo-b', 'milk', 1000, 'ml', 99),
+  makeOffer('demo-b', 'pasta', 1000, 'g', 169, { tags: ['vegan'] }),
+  makeOffer('demo-b', 'eggs', 10, 'count', 249),
+  makeOffer('demo-b', 'oats', 500, 'g', 75, { tags: ['vegan'] }),
+  makeOffer('demo-b', 'tomatoes', 400, 'g', 69, { tags: ['vegan'] }),
+  makeOffer('demo-b', 'water', 1500, 'ml', 39, { depositCents: 25, tags: ['vegan'] }),
+  // Missing eggs here deliberately exercises incomplete baskets.
+  makeOffer('demo-c', 'milk', 1000, 'ml', 89),
+  makeOffer('demo-c', 'pasta', 500, 'g', 69, { tags: ['vegan'] }),
+  makeOffer('demo-c', 'oats', 500, 'g', 69, { tags: ['vegan'] }),
+  makeOffer('demo-c', 'tomatoes', 400, 'g', 79, { tags: ['vegan'] }),
+  makeOffer('demo-c', 'water', 1500, 'ml', 29, { depositCents: 25, tags: ['vegan'] }),
+  makeOffer('demo-c', 'milk', 1000, 'ml', 59, { suffix: 'member', requiresMembership: true }),
+  makeOffer('demo-d', 'milk', 1000, 'ml', 159, { tags: ['organic'], brand: 'Demo Alternative' }),
+  makeOffer('demo-d', 'pasta', 500, 'g', 119, { tags: ['organic', 'vegan'], brand: 'Demo Alternative' }),
+  makeOffer('demo-d', 'eggs', 6, 'count', 299, { tags: ['organic'], brand: 'Demo Alternative' }),
+  makeOffer('demo-d', 'oats', 500, 'g', 99, { tags: ['organic', 'vegan'], brand: 'Demo Alternative' }),
+  makeOffer('demo-d', 'tomatoes', 400, 'g', 95, { tags: ['organic', 'vegan'], brand: 'Demo Alternative' }),
+  makeOffer('demo-d', 'water', 1500, 'ml', 45, { depositCents: 25, tags: ['vegan'], brand: 'Demo Alternative' }),
+];
+
+const demo = { stores, offers, catalog, defaultOrigin };
+
+return { stores, offers, catalog, defaultOrigin };
+})();
+const engine = (() => {
+/**
+ * Deterministic whole-pack basket comparison.
+ *
+ * Distances are geometric estimates, never verified walking routes.
+ * Each item is purchased wholly from one compatible offer at one shop.
+ * Different pack sizes cannot be combined for one item; cheapest means cheapest
+ * within this restricted model, rather than every possible mix of products.
+ * Enumerating singles and pairs is exact for this model: costs are additive,
+ * there are no basket promotions or stock caps, and no item is split across shops.
+ */
+const UNITS = new Set(["g", "ml", "count"]);
+
+function coordinates(point) {
+  if (!point || !Number.isFinite(point.lat) || !Number.isFinite(point.lon) ||
+      Math.abs(point.lat) > 90 || Math.abs(point.lon) > 180) {
+    throw new TypeError("Coordinates must contain valid finite latitude and longitude.");
+  }
+}
+
+function haversineMeters(a, b) {
+  coordinates(a);
+  coordinates(b);
+  const radians = value => value * Math.PI / 180;
+  const dLat = radians(b.lat - a.lat);
+  const dLon = radians(b.lon - a.lon);
+  const h = Math.sin(dLat / 2) ** 2 +
+    Math.cos(radians(a.lat)) * Math.cos(radians(b.lat)) * Math.sin(dLon / 2) ** 2;
+  return 6371008.8 * 2 * Math.asin(Math.sqrt(Math.min(1, Math.max(0, h))));
+}
+
+function validDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(value + "T00:00:00Z");
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function strings(values) {
+  return Array.isArray(values) && values.every(value => typeof value === "string");
+}
+
+function validateRequest(request) {
+  if (!request || !Array.isArray(request.items) || !Array.isArray(request.stores) ||
+      !Array.isArray(request.offers)) throw new TypeError("Items, stores and offers must be arrays.");
+  coordinates(request.origin);
+  if (!validDate(request.shoppingDate)) throw new TypeError("Shopping date must be a valid YYYY-MM-DD date.");
+  if (!["demo", "active_offer"].includes(request.mode)) throw new TypeError("Unknown price comparison mode.");
+  if (![1, 2].includes(request.maxStores)) throw new TypeError("Maximum stores must be one or two.");
+  if (typeof request.allowMembership !== "boolean") throw new TypeError("Membership preference must be explicit.");
+  for (const key of ["radiusM", "maxRoundTripM"]) {
+    if (!Number.isFinite(request[key]) || request[key] < 0) throw new TypeError(key + " must be finite and nonnegative.");
+  }
+  const itemIds = new Set();
+  for (const item of request.items) {
+    if (!item || typeof item.id !== "string" || !item.id || itemIds.has(item.id) ||
+        typeof item.category !== "string" || !item.category ||
+        !Number.isFinite(item.quantity) || item.quantity <= 0 || !UNITS.has(item.unit) ||
+        (item.unit === "count" && !Number.isSafeInteger(item.quantity)) ||
+        (item.brand != null && typeof item.brand !== "string") ||
+        (item.requiredTags != null && !strings(item.requiredTags))) {
+      throw new TypeError("Shopping items need unique IDs, a category, positive quantity and a supported unit.");
+    }
+    itemIds.add(item.id);
+  }
+  const storeIds = new Set();
+  for (const shop of request.stores) {
+    if (!shop || typeof shop.id !== "string" || !shop.id || storeIds.has(shop.id) ||
+        typeof shop.name !== "string") throw new TypeError("Stores need unique IDs and names.");
+    coordinates(shop);
+    storeIds.add(shop.id);
+  }
+}
+
+function eligibleOffer(offer, request, knownStores) {
+  if (!offer || typeof offer.id !== "string" || !offer.id ||
+      typeof offer.category !== "string" || typeof offer.productName !== "string" ||
+      !UNITS.has(offer.unit) || !Number.isFinite(offer.packQuantity) || offer.packQuantity <= 0 ||
+      (offer.unit === "count" && !Number.isSafeInteger(offer.packQuantity)) ||
+      !Number.isSafeInteger(offer.priceCents) || offer.priceCents < 0 ||
+      !Number.isSafeInteger(offer.depositCents) || offer.depositCents < 0 ||
+      !strings(offer.storeIds) || offer.storeIds.length === 0 ||
+      !offer.storeIds.every(id => knownStores.has(id)) ||
+      !strings(offer.tags) || typeof offer.requiresMembership !== "boolean" ||
+      (offer.requiresMembership && !request.allowMembership) ||
+      !validDate(offer.validFrom) || !validDate(offer.validTo) ||
+      offer.validFrom > offer.validTo || request.shoppingDate < offer.validFrom ||
+      request.shoppingDate > offer.validTo || offer.priceKind !== request.mode ||
+      !offer.source || typeof offer.source.label !== "string" ||
+      !(offer.source.url === null || typeof offer.source.url === "string")) return false;
+  if (request.mode === "active_offer" &&
+      (offer.branchScopeVerified !== true || offer.matchReviewed !== true ||
+       offer.source.reviewed !== true || typeof offer.source.url !== "string" ||
+       !/^https?:\/\/\S+/i.test(offer.source.url))) return false;
+  return true;
+}
+
+function compatible(item, offer) {
+  return item.category === offer.category && item.unit === offer.unit &&
+    (item.brand == null || item.brand === "" || item.brand === offer.brand) &&
+    (item.requiredTags ?? []).every(tag => offer.tags.includes(tag));
+}
+
+function purchase(item, offer, storeId) {
+  // Small machine-rounding correction only at a near-exact pack boundary.
+  const ratio = item.quantity / offer.packQuantity;
+  const nearest = Math.round(ratio);
+  const tolerance = Number.EPSILON * Math.max(1, Math.abs(ratio)) * 4;
+  const packs = Math.abs(ratio - nearest) <= tolerance && nearest > 0 ? nearest : Math.ceil(ratio);
+  const merchandiseCents = packs * offer.priceCents;
+  const depositCents = packs * offer.depositCents;
+  const checkoutCents = merchandiseCents + depositCents;
+  if (!Number.isSafeInteger(packs) || packs <= 0 ||
+      !Number.isSafeInteger(merchandiseCents) || !Number.isSafeInteger(depositCents) ||
+      !Number.isSafeInteger(checkoutCents)) return null;
+  const purchasedQuantity = packs * offer.packQuantity;
+  if (!Number.isFinite(purchasedQuantity)) return null;
+  return {
+    itemId: item.id, storeId, offerId: offer.id, productName: offer.productName,
+    packs, purchasedQuantity, excessQuantity: Math.max(0, purchasedQuantity - item.quantity),
+    unit: item.unit, merchandiseCents, depositCents, checkoutCents,
+    source: { ...offer.source }, validFrom: offer.validFrom, validTo: offer.validTo
+  };
+}
+
+function compareText(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function comparePlans(a, b) {
+  return a.checkoutCents - b.checkoutCents || a.roundTripM - b.roundTripM ||
+    compareText(a.storeIds.join("|"), b.storeIds.join("|"));
+}
+
+/**
+ * Strict comparisons exclude observations, unknown deposits, expired offers,
+ * unresolved memberships and mixed demo/real evidence.
+ *
+ * Partial baskets are returned separately and never enter the complete rankings.
+ * Requests do not mutate input arrays or objects. Duplicate category lines are
+ * independent demands; callers should merge equivalent lines before comparison.
+ */
+function planBasket(request) {
+  validateRequest(request);
+  const { items, stores, offers, origin } = request;
+  if (items.length === 0) return { plans: [], partials: [], rejectedOfferCount: 0 };
+  const knownStores = new Set(stores.map(shop => shop.id));
+  const idCounts = new Map();
+  for (const offer of offers) {
+    if (offer && typeof offer.id === "string") idCounts.set(offer.id, (idCounts.get(offer.id) ?? 0) + 1);
+  }
+  const accepted = offers.filter(offer =>
+    eligibleOffer(offer, request, knownStores) && idCounts.get(offer.id) === 1);
+  const rejectedOfferCount = offers.length - accepted.length;
+  const distance = new Map(stores.map(shop => [shop.id, haversineMeters(origin, shop)]));
+  const nearby = stores.filter(shop => distance.get(shop.id) <= request.radiusM)
+    .slice().sort((a, b) => compareText(a.id, b.id));
+  const candidates = nearby.map(shop => [shop]);
+  if (request.maxStores === 2) {
+    for (let i = 0; i < nearby.length; i += 1) {
+      for (let j = i + 1; j < nearby.length; j += 1) candidates.push([nearby[i], nearby[j]]);
+    }
+  }
+  const plans = [];
+  const partials = [];
+  const seen = new Set();
+  for (const candidate of candidates) {
+    const purchases = [];
+    const missingItemIds = [];
+    for (const item of items) {
+      const options = [];
+      for (const offer of accepted) {
+        if (!compatible(item, offer)) continue;
+        for (const shop of candidate) {
+          if (!offer.storeIds.includes(shop.id)) continue;
+          const option = purchase(item, offer, shop.id);
+          if (option) options.push(option);
+        }
+      }
+      options.sort((a, b) => a.checkoutCents - b.checkoutCents ||
+        distance.get(a.storeId) - distance.get(b.storeId) ||
+        compareText(a.storeId, b.storeId) || compareText(a.offerId, b.offerId));
+      if (options.length) purchases.push(options[0]);
+      else missingItemIds.push(item.id);
+    }
+    const visitedIds = new Set(purchases.map(line => line.storeId));
+    const visited = candidate.filter(shop => visitedIds.has(shop.id));
+    // Retain the attempted shop(s) for a zero-coverage diagnostic.
+    const routeStores = visited.length ? visited : candidate;
+    const roundTripM = routeStores.length === 1
+      ? 2 * distance.get(routeStores[0].id)
+      : distance.get(routeStores[0].id) + haversineMeters(routeStores[0], routeStores[1]) +
+        distance.get(routeStores[1].id);
+    if (roundTripM > request.maxRoundTripM) continue;
+    const merchandiseCents = purchases.reduce((total, line) => total + line.merchandiseCents, 0);
+    const depositCents = purchases.reduce((total, line) => total + line.depositCents, 0);
+    const checkoutCents = merchandiseCents + depositCents;
+    if (!Number.isSafeInteger(checkoutCents)) throw new RangeError("Basket total exceeds safe integer cents.");
+    const complete = missingItemIds.length === 0;
+    const outputStores = visited.length ? visited : candidate;
+    const storeIds = outputStores.map(shop => shop.id).sort(compareText);
+    const key = JSON.stringify([storeIds, purchases.map(line => [line.itemId, line.storeId, line.offerId, line.packs]), missingItemIds]);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const result = {
+      storeIds, stores: outputStores.map(shop => ({ ...shop })), purchases,
+      merchandiseCents, depositCents, checkoutCents, roundTripM,
+      distanceKind: "straight_line_estimate", complete, missingItemIds
+    };
+    if (complete) plans.push(result);
+    else partials.push(result);
+  }
+  plans.sort(comparePlans);
+  // Diagnostic ordering prioritizes coverage, never low partial cost.
+  partials.sort((a, b) => a.missingItemIds.length - b.missingItemIds.length || comparePlans(a, b));
+  return { plans, partials, rejectedOfferCount };
+}
+
+return { planBasket };
+})();
+const coverage = (() => {
+const DAY_MS = 86400000;
+
+function calendarTime(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const milliseconds = Date.parse(`${value}T00:00:00Z`);
+  if (!Number.isFinite(milliseconds) || new Date(milliseconds).toISOString().slice(0, 10) !== value) return null;
+  return milliseconds;
+}
+
+const missing = value => value === null || value === undefined || value === '';
+
+/** Count historical provider observations. No date count establishes a current offer. */
+function summarizeCoverage(observations, { shoppingDate, recentDays = 14 } = {}) {
+  if (!Array.isArray(observations)) throw new TypeError('observations must be an array.');
+  const shoppingTime = calendarTime(shoppingDate);
+  if (shoppingTime === null) throw new TypeError('shoppingDate must be a real ISO calendar date.');
+  if (!Number.isInteger(recentDays) || recentDays < 1 || recentDays > 366) throw new TypeError('recentDays must be an integer between 1 and 366.');
+  const recentSince = new Date(shoppingTime - (recentDays - 1) * DAY_MS).toISOString().slice(0, 10);
+  const locations = new Set();
+  const products = new Set();
+  const recordIds = new Set();
+  const dates = [];
+  let duplicateRecordIds = 0;
+  const freshness = { recent: 0, older: 0, future: 0, missing: 0, invalid: 0 };
+  const nullRequiredFields = { providerRecordId: 0, locationId: 0, productCode: 0, observedDate: 0, price: 0, currency: 0, proofId: 0, packQuantity: 0, packUnit: 0 };
+  for (const observation of observations) {
+    const raw = observation?.raw && typeof observation.raw === 'object' ? observation.raw : {};
+    const recordId = observation?.providerRecordId ?? raw.id;
+    const locationId = raw.location_id ?? raw.location?.id;
+    const productCode = raw.product_code ?? raw.product?.code;
+    const observedDate = raw.date ?? observation?.observedOn;
+    const values = {
+      providerRecordId: recordId, locationId, productCode, observedDate,
+      price: raw.price, currency: raw.currency, proofId: raw.proof_id ?? raw.proof?.id,
+      packQuantity: raw.product?.product_quantity,
+      packUnit: raw.product?.product_quantity_unit,
+    };
+    for (const [field, value] of Object.entries(values)) if (missing(value)) nullRequiredFields[field]++;
+    if (!missing(recordId)) {
+      if (recordIds.has(String(recordId))) duplicateRecordIds++;
+      recordIds.add(String(recordId));
+    }
+    if (Number.isInteger(locationId) && locationId > 0) locations.add(locationId);
+    if (typeof productCode === 'string' && productCode.trim()) products.add(productCode.trim());
+    if (missing(observedDate)) { freshness.missing++; continue; }
+    const observedTime = calendarTime(observedDate);
+    if (observedTime === null) { freshness.invalid++; continue; }
+    dates.push(observedDate);
+    const ageDays = (shoppingTime - observedTime) / DAY_MS;
+    if (ageDays < 0) freshness.future++;
+    else if (ageDays < recentDays) freshness.recent++;
+    else freshness.older++;
+  }
+  dates.sort();
+  return {
+    shoppingDate, calendarBasis: 'UTC calendar dates', recentDays, recentSince,
+    observationCount: observations.length,
+    distinctProviderRecordCount: recordIds.size,
+    duplicateRecordIds,
+    distinctLocationCount: locations.size,
+    distinctProductCodeCount: products.size,
+    earliestObservedDate: dates[0] ?? null,
+    latestObservedDate: dates.at(-1) ?? null,
+    freshness, nullRequiredFields,
+    meaning: 'Historical observation counts only; neither current-price validity, verified branch applicability, stock nor complete shopping-list coverage is established.',
+  };
+}
+
+return { summarizeCoverage };
+})();
+const auditView = (() => {
+const { summarizeCoverage } = coverage;
+
+const AUDIT_MAX_BYTES = 2 * 1024 * 1024;
+const AUDIT_MAX_RECORDS = 300;
+const DAY_MS = 86400000;
+const ATTRIBUTION = "Open Prices / Open Food Facts";
+const PRICE_URL = "https://prices.openfoodfacts.org/api/v1/prices";
+const MISSING_FIELDS = [
+  "providerRecordId", "locationId", "productCode", "observedDate",
+  "price", "currency", "proofId", "packQuantity", "packUnit"
+];
+
+class AuditViewError extends Error {
+  constructor(code, message) {
+    super(message);
+    this.name = "AuditViewError";
+    this.code = code;
+  }
+}
+
+function reject(code, message) { throw new AuditViewError(code, message); }
+function object(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+function integer(value, minimum, maximum) {
+  return Number.isSafeInteger(value) && value >= minimum && value <= maximum;
+}
+function calendar(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const milliseconds = Date.parse(value + "T00:00:00Z");
+  return Number.isFinite(milliseconds) && new Date(milliseconds).toISOString().slice(0, 10) === value
+    ? milliseconds : null;
+}
+function timestamp(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return null;
+  const milliseconds = Date.parse(value);
+  return Number.isFinite(milliseconds) && new Date(milliseconds).toISOString() === value ? milliseconds : null;
+}
+function utf8Bytes(value) {
+  let bytes = 0;
+  for (const character of value) {
+    const point = character.codePointAt(0);
+    bytes += point <= 0x7f ? 1 : point <= 0x7ff ? 2 : point <= 0xffff ? 3 : 4;
+  }
+  return bytes;
+}
+function optionalText(value, maximum) {
+  if (value == null) return null;
+  if (typeof value !== "string" || value.length > maximum) reject("INVALID_RECORD", "An observation field has an invalid type or size.");
+  return value;
+}
+function optionalId(value) {
+  if (value == null || value === "") return null;
+  if (!integer(value, 1, Number.MAX_SAFE_INTEGER)) reject("INVALID_RECORD", "An observation identifier is invalid.");
+  return value;
+}
+function optionalNumber(value) {
+  if (value == null || value === "") return null;
+  if (!(typeof value === "number" || (typeof value === "string" && value.length <= 64 && value.trim())) ||
+      !Number.isFinite(Number(value)) || Number(value) < 0) reject("INVALID_RECORD", "An observation number is invalid.");
+  return value;
+}
+function requestParameters(url) {
+  if (typeof url !== "string" || url.length > 2048 || !url.startsWith(PRICE_URL + "?") || url.includes("#")) {
+    reject("INVALID_PROVENANCE", "Report requests must use the expected Open Prices list endpoint.");
+  }
+  const result = {};
+  const allowed = new Set(["lat", "lon", "radius_km", "currency", "size", "page", "date__gte"]);
+  for (const part of url.slice(PRICE_URL.length + 1).split("&")) {
+    const split = part.indexOf("=");
+    if (split < 1) reject("INVALID_PROVENANCE", "A report request parameter is malformed.");
+    let key, value;
+    try {
+      key = decodeURIComponent(part.slice(0, split).replace(/\+/g, " "));
+      value = decodeURIComponent(part.slice(split + 1).replace(/\+/g, " "));
+    } catch { reject("INVALID_PROVENANCE", "A report request parameter is malformed."); }
+    if (!allowed.has(key) || Object.prototype.hasOwnProperty.call(result, key) || !value.trim()) {
+      reject("INVALID_PROVENANCE", "Unexpected or repeated report request parameters.");
+    }
+    result[key] = value;
+  }
+  if (Object.keys(result).length !== allowed.size) reject("INVALID_PROVENANCE", "Report request parameters are incomplete.");
+  return result;
+}
+
+/**
+ * Parse a local, untrusted audit-v1 report into aggregate-only diagnostic data.
+ * No network, storage, raw records, owners, proof URLs, prices or product IDs
+ * leave this boundary. Uploaded summaries are ignored and counts recomputed.
+ * Structural consistency is not independent verification of the reported fetch.
+ */
+function parseAuditReport(jsonText, { maxBytes = AUDIT_MAX_BYTES, maxRecords = AUDIT_MAX_RECORDS } = {}) {
+  if (!integer(maxBytes, 1, AUDIT_MAX_BYTES) || !integer(maxRecords, 0, AUDIT_MAX_RECORDS)) {
+    reject("INVALID_LIMIT", "Audit upload limits must remain within the bounded maximum.");
+  }
+  if (typeof jsonText !== "string") reject("INVALID_INPUT", "Provide the local report as JSON text.");
+  if (jsonText.length > maxBytes || utf8Bytes(jsonText) > maxBytes) reject("TOO_LARGE", "The local audit report exceeds the size limit.");
+  let report;
+  try { report = JSON.parse(jsonText); }
+  catch { reject("INVALID_JSON", "The local audit report is not valid JSON."); }
+  if (!object(report) || report.auditVersion !== 1 || report.referenceDateBasis !== "Europe/Berlin" ||
+      report.attribution !== ATTRIBUTION || report.license !== "ODbL-1.0") {
+    reject("INVALID_REPORT", "The report version or provenance metadata is unsupported.");
+  }
+  const generatedTime = timestamp(report.generatedAt);
+  const window = report.queriedWindow;
+  const limits = report.limits;
+  const query = report.query;
+  if (generatedTime === null || !object(window) || !object(limits) || !object(query)) {
+    reject("INVALID_REPORT", "The report is missing its retrieval, window, limits or query context.");
+  }
+  const sinceTime = calendar(window.sinceInclusive);
+  const referenceTime = calendar(window.referenceDate);
+  const recentDays = (referenceTime - sinceTime) / DAY_MS + 1;
+  if (sinceTime === null || referenceTime === null || !integer(recentDays, 1, 366) ||
+      window.upperDateFilterApplied !== false || query.observedSince !== window.sinceInclusive ||
+      !Number.isFinite(query.lat) || Math.abs(query.lat) > 90 ||
+      !Number.isFinite(query.lon) || Math.abs(query.lon) > 180 ||
+      !Number.isFinite(query.radiusKm) || query.radiusKm <= 0 || query.radiusKm > 50 ||
+      !integer(limits.maxPages, 1, 3) || !integer(limits.pageSize, 1, 100) ||
+      limits.maximumRetainedRecords !== limits.maxPages * limits.pageSize) {
+    reject("INVALID_REPORT", "The report query window or bounded query configuration is inconsistent.");
+  }
+  if (!Array.isArray(report.observations) || report.observations.length > maxRecords ||
+      report.observations.length > limits.maximumRetainedRecords ||
+      !integer(report.providerTotal, report.observations.length, Number.MAX_SAFE_INTEGER) ||
+      typeof report.truncated !== "boolean" || !Array.isArray(report.requests) ||
+      report.requests.length < 1 || report.requests.length > limits.maxPages ||
+      report.observations.length > report.requests.length * limits.pageSize ||
+      (!report.truncated && report.providerTotal !== report.observations.length) ||
+      (report.truncated && (report.providerTotal <= report.observations.length ||
+        report.requests.length !== limits.maxPages))) {
+    reject("INVALID_REPORT", "The report counts, pagination or completeness metadata is inconsistent.");
+  }
+  const capturedCapacity = new Map();
+  for (const [index, request] of report.requests.entries()) {
+    if (!object(request)) reject("INVALID_PROVENANCE", "A report request is malformed.");
+    const capturedTime = timestamp(request.capturedAt);
+    const parameters = requestParameters(request.url);
+    if (capturedTime === null || capturedTime > generatedTime ||
+        Number(parameters.lat) !== query.lat || Number(parameters.lon) !== query.lon ||
+        Number(parameters.radius_km) !== query.radiusKm || parameters.currency !== "EUR" ||
+        Number(parameters.size) !== limits.pageSize || Number(parameters.page) !== index + 1 ||
+        parameters.date__gte !== query.observedSince) {
+      reject("INVALID_PROVENANCE", "Report requests disagree with the declared query or retrieval context.");
+    }
+    capturedCapacity.set(request.capturedAt, (capturedCapacity.get(request.capturedAt) ?? 0) + limits.pageSize);
+  }
+  const recordIds = new Set();
+  const observations = report.observations.map(observation => {
+    if (!object(observation) || observation.provider !== "open-prices" ||
+        observation.attribution !== ATTRIBUTION || observation.license !== "ODbL-1.0" ||
+        observation.validity !== "unconfirmed" || observation.eligibleAsActiveOffer !== false ||
+        !object(observation.raw)) reject("INVALID_RECORD", "An observation wrapper is unsupported.");
+    const raw = observation.raw;
+    if (!integer(raw.id, 1, Number.MAX_SAFE_INTEGER) || observation.providerRecordId !== String(raw.id) ||
+        observation.sourceUrl !== PRICE_URL + "/" + raw.id || recordIds.has(raw.id) ||
+        !capturedCapacity.has(observation.capturedAt) || capturedCapacity.get(observation.capturedAt) <= 0 ||
+        observation.observedOn !== (raw.date ?? null)) {
+      reject("INVALID_PROVENANCE", "An observation disagrees with its record identity or page provenance.");
+    }
+    recordIds.add(raw.id);
+    capturedCapacity.set(observation.capturedAt, capturedCapacity.get(observation.capturedAt) - 1);
+    for (const nested of [raw.location, raw.product, raw.proof]) {
+      if (nested != null && !object(nested)) reject("INVALID_RECORD", "An observation relation is malformed.");
+    }
+    const currency = optionalText(raw.currency, 16);
+    if (currency !== null && currency !== "" && !/^[A-Z]{3}$/.test(currency)) {
+      reject("INVALID_RECORD", "An observation currency is malformed.");
+    }
+    // Project only fields needed for counts and missingness; exclude raw owner/proof content.
+    return {
+      providerRecordId: observation.providerRecordId, observedOn: optionalText(observation.observedOn, 32),
+      raw: {
+        id: raw.id,
+        location_id: optionalId(raw.location_id ?? raw.location?.id),
+        product_code: optionalText(raw.product_code ?? raw.product?.code, 128),
+        date: optionalText(raw.date, 32), price: optionalNumber(raw.price), currency,
+        proof_id: optionalId(raw.proof_id ?? raw.proof?.id),
+        product: {
+          product_quantity: optionalNumber(raw.product?.product_quantity),
+          product_quantity_unit: optionalText(raw.product?.product_quantity_unit, 32)
+        }
+      }
+    };
+  });
+  const coverage = summarizeCoverage(observations, { shoppingDate: window.referenceDate, recentDays });
+  const missingFields = Object.fromEntries(MISSING_FIELDS.map(field => [field, coverage.nullRequiredFields[field]]));
+  return {
+    recordCount: coverage.observationCount, locationCount: coverage.distinctLocationCount,
+    productCount: coverage.distinctProductCodeCount, referenceDate: coverage.shoppingDate,
+    oldestObservationDate: coverage.earliestObservedDate, newestObservationDate: coverage.latestObservedDate,
+    freshness: {
+      recent: coverage.freshness.recent, older: coverage.freshness.older, future: coverage.freshness.future,
+      missing: coverage.freshness.missing, invalid: coverage.freshness.invalid
+    },
+    truncated: report.truncated, providerTotal: report.providerTotal, missingFields,
+    recentDays: coverage.recentDays, recentSince: coverage.recentSince,
+    requestedRadiusKm: query.radiusKm, requestCount: report.requests.length, generatedAt: report.generatedAt,
+    provenance: "uploaded_report_unverified", currentPriceEligible: false
+  };
+}
+
+return { parseAuditReport };
+})();
+(() => {
+const { stores, offers, catalog, defaultOrigin } = demo;
+const { planBasket } = engine;
+const { parseAuditReport } = auditView;
+
+
+
+const STORAGE_KEY = 'basketwise-demo-v1';
+const money = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
+const quantityFormat = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 3 });
+const byId = (id) => document.getElementById(id);
+const node = (tag, className, text) => {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+};
+const euros = (cents) => money.format(cents / 100);
+const distance = (metres) => `${(metres / 1000).toFixed(1)} km`;
+const unitLabel = (unit) => unit === 'count' ? 'pieces' : unit;
+const catalogByCategory = new Map(catalog.map((entry) => [entry.category, entry]));
+const storeById = new Map(stores.map((store) => [store.id, store]));
+let idSequence = 0;
+const nextId = () => `item-${Date.now()}-${++idSequence}`;
+const fallbackOrigin = { lat: defaultOrigin.lat ?? defaultOrigin.latitude, lon: defaultOrigin.lon ?? defaultOrigin.lng ?? defaultOrigin.longitude };
+const todayParts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+const calendarPart = (type) => todayParts.find((part) => part.type === type).value;
+const today = `${calendarPart('year')}-${calendarPart('month')}-${calendarPart('day')}`;
+const defaults = {
+  items: catalog.slice(0, 4).map((entry) => ({ id: nextId(), category: entry.category, quantity: entry.defaultQuantity, unit: entry.unit, brand: null, requiredTags: [] })),
+  shoppingDate: today, radiusM: 2000, walkingMinutes: 45,
+  maxStores: 2, allowMembership: false, origin: fallbackOrigin,
+};
+
+function validDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function validOrigin(origin) {
+  return origin && Number.isFinite(origin.lat) && Math.abs(origin.lat) <= 90 && Number.isFinite(origin.lon) && Math.abs(origin.lon) <= 180;
+}
+
+function validQuantity(item) {
+  return Number.isFinite(item.quantity) && item.quantity > 0 && item.quantity <= 10000 && (item.unit !== 'count' || Number.isSafeInteger(item.quantity));
+}
+
+function mergeEquivalentItems(items) {
+  const grouped = new Map();
+  const merged = [];
+  for (const item of items) {
+    if (!validQuantity(item)) { merged.push(item); continue; }
+    const key = JSON.stringify([item.category, item.unit, item.brand, [...new Set(item.requiredTags)].sort()]);
+    const existing = grouped.get(key);
+    if (existing) existing.quantity += item.quantity;
+    else { grouped.set(key, item); merged.push(item); }
+  }
+  return merged;
+}
+
+function restoreState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!saved || !Array.isArray(saved.items)) return defaults;
+    const items = saved.items.slice(0, 50).filter((item) => item && catalogByCategory.has(item.category) && Number.isFinite(item.quantity) && item.quantity > 0).map((item) => ({
+      id: nextId(), category: item.category, quantity: item.quantity,
+      unit: catalogByCategory.get(item.category).unit,
+      brand: item.brand === 'Demo Standard' ? item.brand : null,
+      requiredTags: Array.isArray(item.requiredTags) ? item.requiredTags.filter((tag) => ['vegan', 'organic'].includes(tag)) : [],
+    }));
+    return {
+      ...defaults, items,
+      shoppingDate: validDate(saved.shoppingDate) ? saved.shoppingDate : defaults.shoppingDate,
+      radiusM: Number.isFinite(saved.radiusM) && saved.radiusM >= 500 && saved.radiusM <= 5000 ? saved.radiusM : defaults.radiusM,
+      walkingMinutes: Number.isFinite(saved.walkingMinutes) && saved.walkingMinutes >= 10 && saved.walkingMinutes <= 120 ? saved.walkingMinutes : defaults.walkingMinutes,
+      maxStores: saved.maxStores === 1 ? 1 : 2,
+      allowMembership: saved.allowMembership === true,
+      origin: validOrigin(saved.origin) ? saved.origin : fallbackOrigin,
+    };
+  } catch { return defaults; }
+}
+
+let state = restoreState();
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch { /* Private browsing or storage restrictions do not block comparison. */ }
+}
+
+function update() {
+  state.items = mergeEquivalentItems(state.items);
+  saveState();
+  renderItems();
+  renderResults();
+  byId('radius-value').textContent = distance(state.radiusM);
+  byId('walking-value').textContent = `${state.walkingMinutes} min estimated`;
+  byId('origin-summary').textContent = state.origin.lat === fallbackOrigin.lat && state.origin.lon === fallbackOrigin.lon ? 'Starting point · central Münster' : 'Starting point · custom coordinates';
+}
+
+function optionControl(item, labelText, checked, onChange) {
+  const label = node('label');
+  const input = node('input');
+  input.type = 'checkbox';
+  input.checked = checked;
+  input.setAttribute('aria-label', `${labelText} for ${catalogByCategory.get(item.category).label}`);
+  input.addEventListener('change', () => { onChange(input.checked); update(); });
+  label.append(input, node('span', '', labelText));
+  return label;
+}
+
+function renderItems() {
+  byId('item-count').textContent = `${state.items.length} ${state.items.length === 1 ? 'item' : 'items'}`;
+  const container = byId('shopping-items');
+  container.replaceChildren();
+  if (!state.items.length) {
+    container.append(node('p', 'quiet-note', 'Start with a staple above. Your comparison will appear as soon as you add an item.'));
+    return;
+  }
+  for (const item of state.items) {
+    const entry = catalogByCategory.get(item.category);
+    const row = node('div', 'item-row');
+    const top = node('div', 'item-top');
+    const bullet = node('span', 'item-bullet', '◦');
+    bullet.setAttribute('aria-hidden', 'true');
+    const quantity = node('input', 'item-quantity');
+    quantity.type = 'number'; quantity.min = item.unit === 'count' ? '1' : '0.001'; quantity.max = '10000'; quantity.step = item.unit === 'count' ? '1' : 'any'; quantity.required = true;
+    quantity.value = Number.isFinite(item.quantity) ? item.quantity : '';
+    quantity.setAttribute('aria-label', `Required quantity of ${entry.label} in ${unitLabel(item.unit)}`);
+    quantity.addEventListener('change', () => { item.quantity = quantity.value === '' ? NaN : Number(quantity.value); update(); });
+    const remove = node('button', 'remove-button', '×');
+    remove.type = 'button'; remove.setAttribute('aria-label', `Remove ${entry.label}`);
+    remove.addEventListener('click', () => { state.items = state.items.filter((candidate) => candidate.id !== item.id); update(); });
+    top.append(bullet, node('span', 'item-name', entry.label), quantity, node('span', 'item-unit', unitLabel(item.unit)), remove);
+    const options = node('div', 'item-options');
+    options.append(optionControl(item, 'Demo Standard brand', item.brand === 'Demo Standard', (checked) => { item.brand = checked ? 'Demo Standard' : null; }));
+    for (const tag of ['vegan', 'organic']) {
+      options.append(optionControl(item, tag[0].toUpperCase() + tag.slice(1), item.requiredTags.includes(tag), (checked) => {
+        item.requiredTags = checked ? [...new Set([...item.requiredTags, tag])] : item.requiredTags.filter((value) => value !== tag);
+      }));
+    }
+    row.append(top, options); container.append(row);
+  }
+}
+
+function safeSourceLink(source) {
+  const url = typeof source === 'string' ? source : source?.url;
+  const label = typeof source === 'object' && source ? source.label ?? source.name ?? 'Demo source' : 'Demo source';
+  try {
+    const parsed = new URL(url);
+    if (!['http:', 'https:'].includes(parsed.protocol)) return node('span', '', label);
+    const link = node('a', '', label);
+    link.href = parsed.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+    return link;
+  } catch { return node('span', '', label); }
+}
+
+function planStoreNames(plan) {
+  return (plan.storeIds ?? []).map((id) => storeById.get(id)?.name ?? String(id)).join(' + ');
+}
+
+function planCard(plan, title, featured) {
+  const card = node('article', `comparison-card${featured ? ' featured' : ''}`);
+  const top = node('div', 'card-topline');
+  top.append(node('h3', 'card-label', title), node('span', 'card-badge', `${state.items.length}/${state.items.length} items priced`));
+  const price = node('div', 'price-line');
+  price.append(node('span', 'basket-price', euros(plan.checkoutCents)), node('span', 'price-caption', 'at checkout · demo'));
+  card.append(top, price, node('p', 'cost-detail', `${euros(plan.merchandiseCents)} groceries + ${euros(plan.depositCents)} refundable Pfand`), node('p', 'store-names', planStoreNames(plan)));
+  const metrics = node('div', 'trip-metrics');
+  metrics.append(node('span', '', `${plan.storeIds.length} ${plan.storeIds.length === 1 ? 'shop' : 'shops'}`), node('span', '', `${distance(plan.roundTripM)} round trip estimate`), node('span', '', `~${Math.ceil(plan.roundTripM / 80)} min estimate`));
+  card.append(metrics, node('p', 'estimate-note', 'Fictional stores. Straight-line distance estimate, not a walking route. Includes returning to your starting point.'));
+  const details = node('details', 'purchase-details');
+  details.append(node('summary', '', 'See purchases and price evidence'));
+  const list = node('ul', 'purchase-list');
+  for (const purchase of plan.purchases) {
+    const row = node('li', 'purchase-row');
+    const name = node('div', 'purchase-title');
+    name.append(node('span', '', purchase.productName), node('span', '', euros(purchase.checkoutCents)));
+    row.append(name, node('p', 'purchase-meta', `${purchase.packs} ${purchase.packs === 1 ? 'pack' : 'packs'} · ${quantityFormat.format(purchase.purchasedQuantity)} ${unitLabel(purchase.unit)} purchased · ${quantityFormat.format(purchase.excessQuantity)} ${unitLabel(purchase.unit)} extra · ${storeById.get(purchase.storeId)?.name ?? purchase.storeId}`));
+    if (purchase.depositCents > 0) row.append(node('p', 'purchase-meta', `Includes ${euros(purchase.depositCents)} refundable Pfand.`));
+    const evidence = node('p', 'source-note');
+    evidence.append(node('span', '', 'Fictional offer · '), safeSourceLink(purchase.source), node('span', '', ` · valid ${purchase.validFrom} to ${purchase.validTo}`));
+    row.append(evidence); list.append(row);
+  }
+  details.append(list); card.append(details);
+  return card;
+}
+
+function showEmpty(title, message) {
+  const empty = node('div', 'empty-state');
+  empty.append(node('h3', '', title), node('p', '', message));
+  byId('comparison-results').append(empty);
+}
+
+function renderResults() {
+  const results = byId('comparison-results');
+  const partials = byId('partial-results');
+  results.replaceChildren(); partials.replaceChildren();
+  const summary = byId('results-summary');
+  if (!state.items.length) {
+    summary.textContent = 'Your basket is empty.';
+    showEmpty('A good trip starts with a list.', 'Add an item to compare fictional complete baskets within your chosen limits.'); return;
+  }
+  if (!validDate(state.shoppingDate) || !validOrigin(state.origin) || state.items.some((item) => !validQuantity(item))) {
+    summary.textContent = 'Check your inputs before comparing.';
+    showEmpty('A little detail needs fixing.', 'Use a valid date, latitude between −90 and 90, longitude between −180 and 180, and item quantities greater than zero and no more than 10,000. Counted items require whole numbers.'); return;
+  }
+  let comparison;
+  try {
+    comparison = planBasket({ items: state.items, stores, offers, origin: state.origin, shoppingDate: state.shoppingDate, mode: 'demo', radiusM: state.radiusM, maxRoundTripM: state.walkingMinutes * 80, maxStores: state.maxStores, allowMembership: state.allowMembership });
+  } catch {
+    summary.textContent = 'The comparison could not be calculated.';
+    showEmpty('We could not compare this basket.', 'Adjust the list or trip settings and try again. No incomplete basket has been ranked as cheapest.'); return;
+  }
+  const plans = comparison.plans.filter((plan) => plan.complete).slice().sort((a, b) => a.checkoutCents - b.checkoutCents || a.roundTripM - b.roundTripM || a.storeIds.length - b.storeIds.length);
+  const best = plans[0];
+  const single = plans.find((plan) => plan.storeIds.length === 1);
+  summary.textContent = `${plans.length} complete fictional ${plans.length === 1 ? 'option' : 'options'} for ${state.shoppingDate}. Whole-pack checkout totals include Pfand. Price coverage is limited to the demo catalogue.`;
+  if (!best) {
+    showEmpty('No complete basket within these limits.', 'Try a wider radius or time budget, relax an item constraint, or choose a date with valid demo offers. Missing items are shown below and never treated as free.');
+  } else {
+    if (single && best.checkoutCents < single.checkoutCents) results.append(node('p', 'savings-note', `${euros(single.checkoutCents - best.checkoutCents)} less than the best single-shop basket · ${Math.max(0, Math.ceil(best.roundTripM / 80) - Math.ceil(single.roundTripM / 80))} extra estimated minutes.`));
+    results.append(planCard(best, 'Lowest compared complete basket', true));
+    if (single && single !== best) results.append(planCard(single, 'Best single shop', false));
+    else if (single) results.append(node('p', 'quiet-note', 'The lowest-cost complete option is also the best single-shop option.'));
+    else results.append(node('p', 'quiet-note', 'No single shop covers the full list within these limits.'));
+  }
+  if (comparison.partials?.length) {
+    const section = node('section', 'partial-section');
+    section.append(node('h3', '', 'Partial matches · not ranked as cheapest'), node('p', 'partial-intro', 'These options are missing items. Their subtotals are not comparable with a complete basket.'));
+    for (const partial of comparison.partials.slice(0, 4)) {
+      const missing = (partial.missingItemIds ?? []).map((id) => state.items.find((item) => item.id === id)).filter(Boolean).map((item) => catalogByCategory.get(item.category).label);
+      const row = node('div', 'partial-row');
+      row.append(node('strong', '', planStoreNames(partial)), node('p', '', `Missing: ${missing.join(', ') || 'unavailable price evidence'}.`));
+      section.append(row);
+    }
+    partials.append(section);
+  }
+}
+
+for (const entry of catalog) {
+  const option = node('option', '', `${entry.label} · ${unitLabel(entry.unit)}`);
+  option.value = entry.category; byId('catalog-select').append(option);
+}
+
+byId('add-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const entry = catalogByCategory.get(byId('catalog-select').value);
+  if (!entry || state.items.length >= 50) return;
+  const existing = state.items.find((item) => item.category === entry.category && item.brand === null && item.requiredTags.length === 0);
+  if (existing && Number.isFinite(existing.quantity)) existing.quantity += entry.defaultQuantity;
+  else state.items.push({ id: nextId(), category: entry.category, quantity: entry.defaultQuantity, unit: entry.unit, brand: null, requiredTags: [] });
+  update();
+});
+
+const bindValue = (id, stateKey, convert = (value) => value) => {
+  const control = byId(id); control.value = state[stateKey];
+  control.addEventListener('change', () => { state[stateKey] = convert(control.value); update(); });
+};
+bindValue('shopping-date', 'shoppingDate');
+bindValue('max-stores', 'maxStores', Number);
+bindValue('radius', 'radiusM', Number);
+bindValue('walking-minutes', 'walkingMinutes', Number);
+byId('allow-membership').checked = state.allowMembership;
+byId('allow-membership').addEventListener('change', (event) => { state.allowMembership = event.target.checked; update(); });
+for (const [id, key] of [['origin-lat', 'lat'], ['origin-lon', 'lon']]) {
+  byId(id).value = state.origin[key];
+  byId(id).addEventListener('change', (event) => { state.origin = { ...state.origin, [key]: event.target.value === '' ? NaN : Number(event.target.value) }; update(); });
+}
+const MAX_AUDIT_BYTES = 2 * 1024 * 1024;
+let auditReadSequence = 0;
+
+function renderAudit(view) {
+  const container = byId('audit-summary');
+  container.replaceChildren();
+  const stats = node('div', 'audit-stats');
+  for (const [value, label] of [
+    [view.recordCount, 'Observation records'],
+    [view.locationCount, 'Distinct provider location IDs'],
+    [view.productCount, 'Distinct product codes'],
+    [view.freshness.recent, 'Recent relative to the report reference day'],
+  ]) {
+    const stat = node('div', 'audit-stat');
+    stat.append(node('strong', '', String(value)), node('span', '', label));
+    stats.append(stat);
+  }
+  container.append(stats);
+  const dates = view.oldestObservationDate && view.newestObservationDate ? `${view.oldestObservationDate} to ${view.newestObservationDate}` : 'No valid observation dates';
+  container.append(node('p', 'audit-detail', `Observation dates: ${dates}.`));
+  container.append(node('p', 'audit-detail', `Imported report reference day: ${view.referenceDate}. Recent means ${view.recentSince} to ${view.referenceDate}, inclusive (${view.recentDays} calendar days). This is not a freshness check against today.`));
+  container.append(node('p', 'audit-detail', `${view.freshness.older} older · ${view.freshness.future} after the report reference day · ${view.freshness.missing} missing dates · ${view.freshness.invalid} invalid dates.`));
+  const declaredTotal = view.providerTotal === null ? 'unknown provider total' : `${view.providerTotal} provider records`;
+  container.append(node('p', 'audit-detail', `The file declares ${declaredTotal}; ${view.truncated ? 'retrieval was truncated' : 'retrieval was not truncated'}. Declared retrieval metadata and file provenance are not independently verified.`));
+  const gaps = [
+    ['packQuantity', 'pack quantity'], ['packUnit', 'pack unit'], ['price', 'price'],
+    ['currency', 'currency'], ['locationId', 'location ID'], ['proofId', 'proof reference'],
+  ].filter(([key]) => view.missingFields[key] > 0).map(([key, label]) => `${view.missingFields[key]} missing ${label}`);
+  if (gaps.length) container.append(node('p', 'audit-detail', `Evidence gaps: ${gaps.join('; ')}.`));
+  const scope = view.locationCount === 1 ? 'This file contains one provider location identifier, whose supermarket branch identity has not been verified.' : 'Provider location identifiers are not verified supermarket branches.';
+  container.append(node('p', 'audit-warning', `Historical observation inspection only. ${scope} Product codes do not establish shopping-list coverage. These records do not confirm current prices, stock, or a complete basket and are not used in the fictional comparison above.`));
+}
+
+byId('audit-file').addEventListener('change', async (event) => {
+  const ticket = ++auditReadSequence;
+  const file = event.target.files?.[0];
+  byId('audit-summary').replaceChildren();
+  byId('audit-clear').hidden = !file;
+  if (!file) {
+    byId('audit-status').textContent = 'Select a local audit JSON to view its evidence profile.';
+    return;
+  }
+  if (!Number.isSafeInteger(file.size) || file.size < 0 || file.size > MAX_AUDIT_BYTES) {
+    byId('audit-status').textContent = 'This file is too large or has an invalid size. Choose an audit JSON no larger than 2 MiB.';
+    return;
+  }
+  byId('audit-status').textContent = 'Reading the selected local file. Nothing is uploaded.';
+  let text;
+  try { text = await file.text(); }
+  catch {
+    if (ticket === auditReadSequence) byId('audit-status').textContent = 'This local file could not be read. Choose it again or select another audit JSON.';
+    return;
+  }
+  if (ticket !== auditReadSequence) return;
+  try {
+    const view = parseAuditReport(text, { maxBytes: MAX_AUDIT_BYTES, maxRecords: 300 });
+    renderAudit(view);
+    byId('audit-status').textContent = 'Aggregate counters recomputed from the selected file. File authenticity is unverified; its raw records are not displayed or saved.';
+  } catch {
+    byId('audit-summary').replaceChildren();
+    byId('audit-status').textContent = 'This is not a supported audit JSON, or its content exceeds the limits. Choose a report produced by the audit command with at most 300 observations and a maximum size of 2 MiB.';
+  }
+});
+
+byId('audit-clear').addEventListener('click', () => {
+  ++auditReadSequence;
+  byId('audit-file').value = '';
+  byId('audit-summary').replaceChildren();
+  byId('audit-clear').hidden = true;
+  byId('audit-status').textContent = 'Inspection cleared. No audit data was saved by this app.';
+});
+
+update();
+
+})();
+})();
+</script>
+  </body>
+</html>

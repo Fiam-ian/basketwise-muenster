@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#16392f">
+    <meta name="description" content="An open-source grocery basket comparison prototype for Münster, with clearly labelled fictional demonstration data.">
+    <title>Basketwise · Münster grocery planner</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Basketwise home"><span class="brand-mark" aria-hidden="true">b.</span><span>basketwise<span class="brand-sub">MÜNSTER PILOT</span></span></a>
+      <span class="header-note">A better basket, a shorter trip.</span>
+      <span class="demo-pill">DEMO PROTOTYPE</span>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">YOUR LIST. YOUR NEIGHBOURHOOD.</p>
+        <h1 id="page-title">Make your next<br>grocery run <span>go further.</span></h1>
+        <p class="intro-copy">Compare the cost of your whole basket, then decide how far you want to go.</p>
+      </section>
+      <aside class="demo-notice" aria-label="Demonstration data notice"><span aria-hidden="true">◌</span><p><strong>This is a demonstration, not current supermarket pricing.</strong> All stores and offers are fictional. Distances are straight-line estimates, not walking routes. Advertised prices never guarantee stock.</p></aside>
+      <div class="workspace">
+        <div class="planning-column">
+          <section class="panel list-panel" aria-labelledby="list-title">
+            <div class="panel-heading"><div><p class="eyebrow">01 / BUILD YOUR BASKET</p><h2 id="list-title">Your shopping list</h2></div><span id="item-count" class="count-pill"></span></div>
+            <form id="add-form" class="add-form"><label class="sr-only" for="catalog-select">Grocery item</label><select id="catalog-select"></select><button class="button button-primary" type="submit">+ Add item</button></form>
+            <div id="shopping-items"></div>
+            <p class="quiet-note">Quantities describe what you need. Results include the whole packs you would actually buy.</p>
+          </section>
+          <section class="panel" aria-labelledby="trip-title">
+            <div class="panel-heading"><div><p class="eyebrow">02 / SET YOUR LIMITS</p><h2 id="trip-title">Make it your kind of trip</h2></div></div>
+            <div class="control-grid">
+              <label class="field">Shopping date<input id="shopping-date" type="date" required></label>
+              <label class="field">Maximum shops<select id="max-stores"><option value="1">One shop</option><option value="2">Up to two shops</option></select></label>
+            </div>
+            <label class="range-field" for="radius"><span>Search radius <strong id="radius-value"></strong></span><input id="radius" type="range" min="500" max="5000" step="250"><small>Straight-line distance from your starting point to each shop.</small></label>
+            <label class="range-field" for="walking-minutes"><span>Round-trip time budget <strong id="walking-value"></strong></span><input id="walking-minutes" type="range" min="10" max="120" step="5"><small>Estimated at 80 metres per minute, including your return. Streets and barriers are not included.</small></label>
+            <label class="checkbox-field"><input id="allow-membership" type="checkbox"><span>Include membership-only prices <small>Enable only if you meet the offer conditions.</small></span></label>
+            <details class="origin-settings"><summary id="origin-summary">Starting point · central Münster</summary><p class="quiet-note">The default is a public city-centre point. Change the coordinates to explore another start. No location is requested or sent to a server.</p><div class="control-grid"><label class="field">Latitude<input id="origin-lat" type="number" min="-90" max="90" step="any"></label><label class="field">Longitude<input id="origin-lon" type="number" min="-180" max="180" step="any"></label></div></details>
+          </section>
+          <p class="local-note">Your list stays in this browser when local storage is available. No account. No trackers.</p>
+        </div>
+        <section class="results-column" aria-labelledby="results-title">
+          <div class="results-heading"><div><p class="eyebrow">03 / FIND YOUR FIT</p><h2 id="results-title">Your basket, compared</h2></div><span class="live-indicator">Updates as you edit</span></div>
+          <div id="results-summary" class="results-summary" role="status" aria-live="polite"></div>
+          <div id="comparison-results"></div>
+          <div id="partial-results"></div>
+          <section class="panel audit-panel" aria-labelledby="audit-title">
+            <div class="panel-heading"><div><p class="eyebrow">LOCAL EVIDENCE / INSPECTION ONLY</p><h2 id="audit-title">Read your price audit</h2></div><span class="card-badge">Local only</span></div>
+            <p class="audit-intro">Open an audit JSON from your local-data folder to inspect historical observation counts and dates. This does not add real prices to the fictional basket comparison.</p>
+            <label class="field" for="audit-file">Choose a local audit JSON<input id="audit-file" type="file" accept=".json,application/json"></label>
+            <p class="quiet-note">Up to 2 MiB and 300 observations. The file stays on your device, is never uploaded or saved by this app, and receipt images, proof links and owner details are not displayed.</p>
+            <p id="audit-status" class="audit-status" role="status" aria-live="polite">Select a local audit JSON to view its evidence profile.</p>
+            <div id="audit-summary"></div>
+            <button id="audit-clear" class="button audit-clear" type="button" hidden>Clear inspection</button>
+          </section>
+          <aside class="how-it-works"><p class="eyebrow">A LITTLE CLARITY</p><h3>A cheap basket should be a complete basket.</h3><p>We compare eligible whole-pack purchases using one product per required item. Equivalent duplicate list items are combined. Mixing different pack sizes or products for the same item is outside this prototype's comparison. Missing items never count as free. Refundable Pfand is included in checkout totals and shown separately.</p><p>This prototype uses fictional prices and straight-line trip estimates. A future live comparison will need verified sources and walking routes.</p></aside>
+        </section>
+      </div>
+    </main>
+    <footer><span>Basketwise · Built for a more considered grocery run.</span><span>Open-source prototype · Münster, NRW</span></footer>
+    <script type="module" src="./src/app.mjs"></script>
+  </body>
+</html>
