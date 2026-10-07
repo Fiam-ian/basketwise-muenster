@@ -11,7 +11,8 @@
     "coverage:audit": "node scripts/audit-coverage.mjs",
     "coverage:inspect": "node scripts/inspect-coverage.mjs",
     "historical:audit": "node scripts/audit-historical.mjs",
-    "catalog:build": "node scripts/build-local-catalog.mjs"
+    "catalog:build": "node scripts/build-local-catalog.mjs",
+    "retailer:capture": "node scripts/capture-retailer-source.mjs"
   },
   "engines": {
     "node": ">=22"
