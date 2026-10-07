@@ -67,3 +67,9 @@ A broader 90-day bounded audit supplied 77 observations/71 product codes/four pr
 ## Official offer-source priority
 
 Following the user's source suggestion, prioritize branch-specific official advertised offers and public leaflets. A four-resource EDEKA 074601 collector succeeded using ordinary public HTTP requests, with hash-pinned local snapshots and strict size/date/template checks. Manual visual review found two starter-category candidates; automatic ranking remains disabled. REWE direct/browser access returned 403; EDEKA's API gateway requires requesting access. No free official whole-inventory API was verified, protected access bypassed or retailer content published. See retailer-sources.md for actual findings, source links and remaining review gates. Historical evidence remains separate.
+
+## Broader supermarket and delivery discovery — 8 October
+
+The user requested chain/independent/delivery source breadth and radius expansion. Registered 25 source candidates with exact public sources and uncertain presence kept explicit; see muenster-source-map.md and data/source-registry.json. Implemented OSM radius discovery and a working public Wolt/Flink listing collector. The latter captured 21 distinct priced delivery listings without an account. Map-discovery live requests failed with service errors and established no coverage. Consumer accounts are not substitutes for merchant API onboarding; public collectors currently need none.
+
+Delivery listings remain a separate channel with unknown fees/address applicability and no shelf/stock/ranking claim. Preserve public source snapshots privately and update sources independently; broader source scope does not justify promising every shop's full inventory. HIT/Netto/PENNY and Marktkauf are next branch-offer candidates. No private identity/account, paid service or order was introduced.

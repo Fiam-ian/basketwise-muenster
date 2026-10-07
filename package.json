@@ -12,7 +12,9 @@
     "coverage:inspect": "node scripts/inspect-coverage.mjs",
     "historical:audit": "node scripts/audit-historical.mjs",
     "catalog:build": "node scripts/build-local-catalog.mjs",
-    "retailer:capture": "node scripts/capture-retailer-source.mjs"
+    "retailer:capture": "node scripts/capture-retailer-source.mjs",
+    "delivery:capture": "node scripts/capture-wolt-listings.mjs",
+    "shops:discover": "node scripts/discover-shops.mjs"
   },
   "engines": {
     "node": ">=22"
