@@ -5,7 +5,7 @@ The next acquisition trial uses the official REWE Android app in guest mode on a
 ## Checked host and installed tools
 
 - WSL2 Ubuntu, x86_64 kernel 6.18.40.1; WSLg display and Wayland available.
-- CPU exposes `vmx`; `/dev/kvm` is absent. No existing Java, emulator or Android SDK was found in checked Linux paths or standard Windows Android installation paths.
+- CPU exposes `vmx`. The initial restricted view did not expose `/dev/kvm`; a later native check found the device and loaded kvm/kvm_intel modules. The current user lacks read/write permission because it is not in group kvm. No existing Java, emulator or Android SDK was found in checked Linux paths or standard Windows Android installation paths.
 - Approximately 902 GiB free in the project filesystem. Disk capacity does not resolve missing acceleration.
 - Google's official Linux platform-tools archive was downloaded into `/tmp` and extracted into ignored `.tools/android/platform-tools`. Verified adb/fastboot version: **37.0.1-15733141**. Download SHA-256: `d230f13842f60f782a8645f9c813f8f845bf36089ea7289f28c48f17979313f1`. This is the hash of the retrieved archive, not a separately authenticated publisher checksum.
 - An isolated adb daemon started successfully; `devices -l` reported no connected devices. No device was paired and no retailer account or app data was accessed.
@@ -41,7 +41,7 @@ No APK mirror, root access, certificate interception, account fabrication or acc
 
 ## User-requested WSL emulator installation
 
-The user requested installation despite the missing phone and KVM. Installed
+The user requested a WSL emulator after declining the physical-phone trial. Installed
 Google's **Android Emulator 37.2.12 (build 16428233)** and the official
 **Android 11/API 30 Google Play x86_64 image, revision 10**, under ignored
 `.tools/android`. Downloads came from Google's package repository; exact sizes
@@ -54,20 +54,19 @@ These are publisher metadata integrity checks, not an independent signature
 verification. Archive manifest and packages remain ignored with the SDK.
 
 The emulator binary runs and lists `basketwise-api30`. The acceleration check
-fails because `/dev/kvm` is absent; adding a user to a group would not create
-that device. No host feature change, reboot or global Java install was made.
+fails for the current user: native `/dev/kvm` exists (major10/minor232), owned by root:kvm with mode0660, but chava is not in kvm group. No host feature change, reboot or global Java install was made.
 The private AVD uses software CPU translation and SwiftShader graphics.
 
 ```sh
 cd /home/chava/Projects/groceries-compare
 prototype/scripts/create-android-avd.sh
 prototype/scripts/android-sandbox.sh emulator -avd basketwise-api30 \
-  -accel off -gpu software -no-audio -no-snapshot -no-boot-anim \
-  -cores 2 -memory 1536
+  -accel off -gpu swiftshader -feature -Vulkan -no-window \
+  -no-audio -no-snapshot -no-boot-anim -show-kernel -cores 2 -memory 2048
 ```
 
-This opens the emulator through WSLg when supported. Add `-no-window` for
-headless capture and `-show-kernel` when diagnosing boot. Do not start a second
+This is the diagnostic headless configuration. A visible WSLg trial exited
+with code 139 after X display errors; GUI operation is not verified. Do not start a second
 instance against the same AVD while one is running. The creation script
 preserves an existing AVD. SDK paths are mounted as `/opt`, virtual devices as
 `/home/chava/avd`, and Android home/keys are inside private local-data through
@@ -88,3 +87,43 @@ Google Play login and branch catalogue access are not verified or installed.
 No personal Google/retailer account has been created or used. Install REWE only
 from its official Play listing once the runtime is usable; an emulator alone
 does not solve source availability or establish inventory completeness.
+
+## Boot trial evidence
+
+The initial headless software trial reached the Google boot display but remained
+ADB-offline after approximately twelve minutes. Its process and private disk
+writes continued, so startup was not treated as usable boot. A second, visible
+SwiftShader trial reached zygote, SurfaceFlinger and core services, then exited
+with code139; X connection errors were logged. The exact crash cause is not
+established. Data was preserved between trials. A third headless/no-animation
+trial with Vulkan disabled passed that earlier stop point and started Android
+networking, then also exited139. Completed guest boot and retailer access remain
+unverified; no emulator is currently left consuming CPU. Original
+logs are retained privately as android-emulator-boot.log and v2/v3 variants.
+
+## Corrected KVM finding and next dependency
+
+A native (outside restricted filesystem view) check found `/dev/kvm`, loaded
+`kvm` and `kvm_intel`, and the registered KVM misc device. Opening `/dev/kvm`
+read/write as chava returns PermissionError. The missing item is access, not
+proof that this WSL kernel lacks KVM. Initial missing-device claims above are
+superseded by this finding; accelerated VM creation still needs verification.
+
+Sudo requires a local password, so the agent cannot make the group change
+unattended. The user was asked to run this in their own WSL terminal:
+
+```sh
+sudo usermod -aG kvm chava
+```
+
+Once it succeeds, use `sg` to obtain the updated group without rebooting or
+restarting WSL. From the project root:
+
+```sh
+sg kvm -c 'prototype/scripts/android-sandbox.sh emulator -accel-check'
+sg kvm -c 'prototype/scripts/android-sandbox.sh emulator -avd basketwise-api30 -accel on -gpu software -no-window -no-audio -no-snapshot -no-boot-anim -show-kernel -cores 2 -memory 2048'
+```
+
+Verify KVM API/VM creation, Android completed boot and display/capture separately.
+Neither group membership nor a successful accel-check alone certifies a usable
+retailer-app runtime. No Windows feature change or host reboot was made.
