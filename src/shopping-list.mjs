@@ -1,3 +1,4 @@
+import { isOfferDate } from './offer-view.mjs';
 /** Request types, not retailer products or claims about store inventory. */
 export const GROCERY_INTENTS = Object.freeze([
   ['milk', 'Milk / Milch', 'ml', 1000, ['milk', 'milch', 'vollmilch', 'fettarme milch', 'h-milch']],
@@ -126,4 +127,46 @@ export function findShoppingCandidateLeads(reports, request) {
     }
   }
   return leads;
+}
+
+/** Per-request diagnostics only: none of these candidate reports authorizes checkout totals. */
+export function inspectShoppingListCoverage(reports, list, shoppingDate) {
+  const requests = validateList(list);
+  if (!isOfferDate(shoppingDate) || !Array.isArray(reports) || reports.length > 3) fail();
+  if (reports.some(report => report.rankingEnabled !== false || report.inventoryComplete !== false ||
+      !isOfferDate(report.validFrom) || !isOfferDate(report.validTo) || report.validFrom > report.validTo)) fail();
+  const stores = [...new Set(reports.map(report => report.storeId))];
+  // Validate report identity even when the list is empty.
+  findShoppingCandidateLeads(reports, createShoppingRequest('milk'));
+  const rows = requests.map(request => {
+    const leads = findShoppingCandidateLeads(reports, request).map(lead => {
+      const report = reports.find(report => report.storeId === lead.storeId && (report.leafletId ?? 'supplement') === lead.leafletId);
+      const candidate = lead.candidate;
+      const withinPeriod = report.validFrom <= shoppingDate && shoppingDate <= report.validTo;
+      const reasons = ['product_equivalence_unverified', 'priced_pack_unverified', 'conditions_unverified'];
+      if (!withinPeriod) reasons.push('outside_recorded_period');
+      if (candidate.unit !== request.unit) reasons.push('unit_mismatch');
+      if (candidate.depositCents == null) reasons.push('deposit_unknown');
+      if (candidate.packAmbiguity) reasons.push('pack_ambiguous');
+      if (request.constraints.brand) reasons.push('required_brand_unverified');
+      for (const attribute of ['milkSource', 'processing', 'organic', 'lactoseFree'])
+        if (Object.hasOwn(request.constraints, attribute)) reasons.push('required_attribute_unverified:' + attribute);
+      if (request.constraints.fatBasisPoints != null) {
+        if (candidate.fatBasisPoints == null) reasons.push('required_fat_unknown');
+        else if (candidate.fatBasisPoints !== request.constraints.fatBasisPoints) reasons.push('fat_mismatch');
+        else reasons.push('required_fat_review_unverified');
+      }
+      return { ...lead, withinPeriod, reasons };
+    });
+    return { request, label: shoppingRequestLabel(request), leads,
+      branches: stores.map(storeId => ({ storeId,
+        candidateCount: leads.filter(lead => lead.storeId === storeId).length,
+        withinPeriodCount: leads.filter(lead => lead.storeId === storeId && lead.withinPeriod).length,
+        knownConflictCount: leads.filter(lead => lead.storeId === storeId && lead.reasons.some(reason => ['fat_mismatch', 'unit_mismatch'].includes(reason))).length,
+        comparisonEligibleCount: 0 })) };
+  });
+  return { rows, branches: stores.map(storeId => ({ storeId,
+    storeName: reports.find(report => report.storeId === storeId).storeName,
+    requestedLineCount: requests.length, linesWithCategoryLeads: rows.filter(row => row.leads.some(lead => lead.storeId === storeId)).length,
+    comparisonEligibleLineCount: 0, complete: false })), rankingEnabled: false, inventoryComplete: false };
 }

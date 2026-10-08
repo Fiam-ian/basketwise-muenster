@@ -2,7 +2,7 @@
 
 Our local offer page now supports six German/English searchable grocery request types, editable quantities, required brands and explicit milk source/fat/processing preferences. Identical requests merge; different hard preferences remain separate. Lists stay in tab memory, separate from imported reports; clearing sources preserves the list. No user lists or retailer credentials are published.
 
-Imported category leads appear beneath each request, including advertised-period status and known fat conflicts. They are not verified alternatives. The fixed six-staple evidence table remains a separate source audit. No real basket total is enabled until exact product matching, pack, conditions, Pfand, date and complete-line coverage pass existing gates.
+Imported category leads appear beneath each request, including advertised-period status and known fat conflicts. They are not verified alternatives. The branch evidence table follows the current user list, including quantities and hard preferences. The original six-staple audit remains available through its separate module API. No real basket total is enabled until exact product matching, pack, conditions, Pfand, date and complete-line coverage pass existing gates.
 
 ## Official access findings
 
@@ -16,3 +16,5 @@ A normal isolated Chromium navigation to the official REWE shop returned HTTP 40
 ## Verification
 
 178 native tests passed. Chromium verified German search, equivalent-demand merging, separate milk fat requests, actual three-report leads and fat conflicts, source clearing preserving requests, and 390-pixel layout without document overflow. Mobile screenshot inspected. Source data, browser outputs and shopping lists remain private/ignored. App access and live inventory are still unverified.
+
+The request coverage inspector groups publications by branch, counts recorded-period leads separately, and records known fat/unit conflicts plus unresolved brand/attribute/pack/condition/deposit reasons. All comparison-eligible counts remain zero for these candidate-only reports. Clearing or invalidating the shopping date cannot leave stale coverage or throw during list rendering.

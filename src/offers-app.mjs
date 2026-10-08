@@ -1,4 +1,4 @@
-import { GROCERY_INTENTS, searchGroceryIntents, createShoppingRequest, addShoppingRequest, removeShoppingRequest, shoppingRequestLabel, findShoppingCandidateLeads } from './shopping-list.mjs';
+import { GROCERY_INTENTS, searchGroceryIntents, createShoppingRequest, addShoppingRequest, removeShoppingRequest, shoppingRequestLabel, findShoppingCandidateLeads, inspectShoppingListCoverage } from './shopping-list.mjs';
 import { parseOfferView, OFFER_VIEW_MAX_BYTES, offerDateStatus, isOfferDate, inspectOfferCoverage } from './offer-view.mjs';
 const byId = id => document.getElementById(id);
 const node = (tag, text, className) => {
@@ -24,25 +24,27 @@ function empty() {
   byId('offer-branch').replaceChildren(new Option('All imported branches', ''));
 }
 function renderCoverage() {
-  const area = byId('offer-coverage');
-  area.replaceChildren(node('h2', 'Starter list: where evidence is missing'),
-    node('p', 'Category candidates are leads to review, not equivalent products or eligible basket lines. This table covers all imported branches regardless of filters.'));
-  const table = node('table', undefined, 'offer-coverage-table');
-  table.append(node('caption', 'Six staple requests and captured category candidates'));
+  const area = byId('offer-coverage'); area.replaceChildren();
+  if (!reports.length || !shoppingList.length) { area.hidden = true; return; }
+  if (!isOfferDate(byId('offer-date').value)) { area.append(node('p', 'Choose a valid shopping date to inspect list coverage.')); area.hidden = false; return; }
+  const coverage = inspectShoppingListCoverage(reports, shoppingList, byId('offer-date').value);
+  area.append(node('h2', 'Your list across the captured branches'), node('p', 'Category leads are not verified alternatives. Counts cover your current list and shopping date, across all imported branches.'));
+  const table = node('table', undefined, 'offer-coverage-table'); table.append(node('caption', 'Requested groceries and branch evidence'));
   const head = node('tr'); head.append(node('th', 'Requested item'));
-  for (const storeId of [...new Set(reports.map(report => report.storeId))]) head.append(node('th', reports.find(report => report.storeId === storeId).storeName));
+  for (const branch of coverage.branches) head.append(node('th', branch.storeName));
   const thead = node('thead'); thead.append(head); table.append(thead);
   const tbody = node('tbody');
-  for (const line of inspectOfferCoverage(reports)) {
-    const row = node('tr'), label = node('th', `${line.category} · ${quantity.format(line.quantity)} ${line.unit === 'count' ? 'pieces' : line.unit}`);
+  for (const line of coverage.rows) {
+    const row = node('tr'), label = node('th', `${line.label} · ${quantity.format(line.request.quantity)} ${line.request.unit === 'count' ? 'pieces' : line.request.unit}`);
     label.scope = 'row'; row.append(label);
-    for (const branch of line.branches) row.append(node('td', branch.candidateCount ? `${branch.candidateCount} candidate; checks open` : 'No verified offer found'));
+    for (const branch of line.branches) row.append(node('td', branch.candidateCount ? `${branch.candidateCount} category leads; ${branch.withinPeriodCount} in recorded period; ${branch.knownConflictCount} with known conflicts; 0 verified matches` : 'No captured category leads'));
     tbody.append(row);
   }
-  table.append(tbody); const wrapper = node('div', undefined, 'offer-table-scroll'); wrapper.append(table); area.append(wrapper,
-    node('p', '0 of 6 requested lines are comparison-eligible at each imported branch. No complete basket total or savings can be computed.', 'quiet-note'));
+  table.append(tbody); const wrapper = node('div', undefined, 'offer-table-scroll'); wrapper.append(table); area.append(wrapper);
+  for (const branch of coverage.branches) area.append(node('p', `${branch.storeName}: 0 of ${branch.requestedLineCount} lines eligible. ${branch.linesWithCategoryLeads} lines have category leads. Complete basket unavailable.`, 'quiet-note'));
   area.hidden = false;
 }
+
 function render() {
   byId('offer-cards').replaceChildren();
   if (!reports.length) return;
@@ -115,6 +117,7 @@ function searchIntents() {
 }
 function renderList() {
   const area = byId('list-lines'); area.replaceChildren();
+  const dateValid = isOfferDate(byId('offer-date').value);
   shoppingList.forEach((request, index) => {
     const section = node('section', undefined, 'shopping-line');
     section.append(node('h3', shoppingRequestLabel(request)));
@@ -134,12 +137,13 @@ function renderList() {
     for (const lead of leads) {
       const report = reports.find(item => item.storeId === lead.storeId && item.leafletId === lead.leafletId);
       const mismatch = request.constraints.fatBasisPoints != null && lead.candidate.fatBasisPoints != null && request.constraints.fatBasisPoints !== lead.candidate.fatBasisPoints;
-      section.append(node('p', `${lead.storeName}: ${lead.candidate.productName} · ${money.format(lead.candidate.priceCents / 100)} advertised · ${offerDateStatus(report, byId('offer-date').value)}. ${mismatch ? 'Recorded fat differs from your request. ' : ''}Category lead only; brand, preferences, pack, conditions and Pfand are not verified for this request.`));
+      section.append(node('p', `${lead.storeName}: ${lead.candidate.productName} · ${money.format(lead.candidate.priceCents / 100)} advertised · ${dateValid ? offerDateStatus(report, byId('offer-date').value) : 'Choose a valid shopping date'}. ${mismatch ? 'Recorded fat differs from your request. ' : ''}Category lead only; brand, preferences, pack, conditions and Pfand are not verified for this request.`));
     }
     const remove = node('button', 'Remove', 'button'); remove.type = 'button'; remove.setAttribute('aria-label', `Remove ${shoppingRequestLabel(request)}`);
     remove.addEventListener('click', () => { shoppingList = removeShoppingRequest(shoppingList, index); renderList(); byId('list-status').textContent = 'Grocery removed.'; });
     section.append(remove); area.append(section);
   });
+  renderCoverage();
   byId('list-clear').hidden = !shoppingList.length;
   byId('basket-status').textContent = shoppingList.length ? `${shoppingList.length} requested lines. Cheapest basket unavailable: imported leads have unresolved matching and checkout evidence. Missing lines never count as zero.` : 'Add groceries to see which imported branches have offer leads.';
 }

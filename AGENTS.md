@@ -40,3 +40,5 @@
 - Key local reports by branch and leaflet, aggregating candidate leads into branch columns without double-counting branches. Preserve conflicting bottle/multipack wording and per-container Pfand separately from unknown priced-pack quantity or deposit totals. Lower app/loyalty amounts never silently replace an ordinary advertised price.
 
 - Retailer login is not a prerequisite for our searchable grocery requests. REWE officially permits guest shopping lists/market offers; preserve pickup/delivery price channels because authenticated online prices need not equal shelf prices. Keep private accounts on retailer login surfaces. Request types and imported category leads must never imply inventory or verified alternatives; list state remains separate from source import/clear.
+
+- User-list branch coverage must use the actual current requests and shopping date, update on edits/removals, and aggregate leaflets once per branch. Category, recorded-period and conflict counts are distinct from verified requested-line coverage. Invalid dates must render safely and never retain stale eligible status.

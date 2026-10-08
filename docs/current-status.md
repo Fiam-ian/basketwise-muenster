@@ -111,3 +111,9 @@ The offer page now provides German/English search and dropdown selection for six
 REWE officially allows shopping lists and regional offers without login. Its online pickup prices may differ from shelf prices, so registration would not by itself resolve in-store evidence gaps. Normal Chromium shop access returned 403; no native mobile runtime or project account is available. A phone guest-mode branch/product check is pending user input. See app-access.md.
 
 178 native tests passed; real Chromium verified merging, constraints, three-report candidate display, clearing, and mobile layout. Source-only release; raw sources, reports and lists remain outside Git. Next: phone-access feasibility, usable branch price acquisition, and reviewed complete matching before real cheapest-basket integration.
+
+## Current-list branch coverage — 8 October 2026
+
+Replaced the fixed starter table in the local offer UI with diagnostics for the actual user list. Branch columns aggregate multiple leaflets once per branch and distinguish category leads, recorded-period leads, known fat/unit conflicts and zero verified matches. Quantities, list edits/removals and date changes update coverage immediately; empty/invalid dates render a prompt safely. The underlying starter audit API is preserved. No candidate-only import can enable ranking or complete-basket totals.
+
+181 native tests passed. Chromium verified actual three-report imports against a two-line custom list, correct denominator, expired/empty date changes, quantity/removal refresh, no page errors and no mobile document overflow; screenshot inspected. Phone guest-mode access remains pending. Next: resolve real source/matching evidence; the current list cannot yet produce a real cheapest basket.
