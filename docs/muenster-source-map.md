@@ -8,6 +8,8 @@ The machine-readable register is `data/source-registry.json`: 25 retailer/platfo
 
 For the compact Pluggendorf–Aasee branch pilot and its sequencing, see [neighbourhood-pilot.md](neighbourhood-pilot.md). The initial candidate branches are Rotthowe Aegidiimarkt, Wiewel Aaseemarkt, REWE Geiststraße (market 565814) and Netto Weseler Straße 109 (branch 6046). They are an explicit source test set, not a verified 1 km-radius census. REWE and Netto official branch pages expose public offer content, so test those before creating app accounts.
 
+The subsequent direct test of Netto branch 6046 returned 403; indexed/public offer content does not establish direct collection access. Wiewel’s public offers page supplied a current explicitly dated 17-page leaflet, but exact Aaseemarkt applicability remains unreviewed. See [local-offer-view.md](local-offer-view.md) for retained private evidence and the working EDEKA candidate browser view.
+
 | Retailer | Official Münster evidence / source | Current result |
 | --- | --- | --- |
 | REWE | [Roggenmarkt branch](https://www.rewe.de/marktseite/muenster/250486/rewe-markt-roggenmarkt-15-16/) | Branch offers exist; direct/browser 403 observed |
@@ -69,7 +71,7 @@ The live 10 km requests failed at documented public instances with 500/504 servi
 ## Work order
 
 1. Use the working EDEKA leaflet and Wolt delivery listing as separate source streams; finish constrained product/pack/condition review.
-2. Add HIT, Netto and PENNY branch-offer adapters, then Marktkauf and other local sources based on measured coverage. Leaflet extraction may need visual review.
+2. Prioritize the neighbourhood pilot: resolve Wiewel Aaseemarkt leaflet applicability and retry REWE Geiststraße only through ordinary accessible public sources. Netto’s selected branch currently denies direct access. HIT, PENNY, Marktkauf and other sources follow after the small branch/display flow is repeatable. Leaflet extraction needs visual review.
 3. Re-run bounded location discovery when its public service recovers; reconcile candidate addresses against official branches. Do not scrape every page merely because a map found a location.
 4. Evaluate address-scoped delivery catalogues. Compare delivered checkout totals only once delivery/service/small-order fees, minimum spend, discounts and address applicability are known. Unknown fees never default to zero; walking effort belongs to in-person trips.
 5. Assess specific login-only sources if public sources leave a meaningful coverage gap. Preserve credentials privately and use a designated project identity. Consumer accounts do not resolve missing partner access or complete shelf data.

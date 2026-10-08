@@ -13,6 +13,7 @@
     "historical:audit": "node scripts/audit-historical.mjs",
     "catalog:build": "node scripts/build-local-catalog.mjs",
     "retailer:capture": "node scripts/capture-retailer-source.mjs",
+    "offers:prepare": "node scripts/prepare-offer-view.mjs",
     "delivery:capture": "node scripts/capture-wolt-listings.mjs",
     "shops:discover": "node scripts/discover-shops.mjs"
   },

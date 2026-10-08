@@ -4,9 +4,10 @@ import { fileURLToPath } from 'node:url';
 const assets = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/index.html', ['index.html', 'text/html; charset=utf-8']],
+  ['/offers.html', ['offers.html', 'text/html; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
   ['/favicon.svg', ['favicon.svg', 'image/svg+xml']],
-  ...['app', 'contracts', 'demo-data', 'optimizer', 'open-prices', 'coverage', 'audit-view'].map(name =>
+  ...['app', 'contracts', 'demo-data', 'optimizer', 'open-prices', 'coverage', 'audit-view', 'offer-view', 'offers-app', 'retailer-source'].map(name =>
     ['/src/' + name + '.mjs', ['src/' + name + '.mjs', 'text/javascript; charset=utf-8']])
 ]);
 const port = Number(process.env.PORT ?? 8000);

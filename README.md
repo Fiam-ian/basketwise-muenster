@@ -89,3 +89,5 @@ Node test run or a static review as a browser test.
 ## WSL development and release
 
 See docs/wsl-handoff.md for the project-local runtime PATH. Source is published at https://github.com/Fiam-ian/basketwise-muenster and the first GitHub Actions test run passed. Local audit evidence and tools are excluded. The initial publisher, scripts/publish-wsl.sh, creates a new repository; use normal commits and pushes from a clone for subsequent updates.
+
+The neighbourhood pilot now has a separate [local leaflet offer view](docs/local-offer-view.md). Run `npm run offers:prepare -- --capture local-data/edeka-retailer-capture-v1 --out local-data/NEW_OFFER_VIEW.json`, start the local server and open `/offers.html` to import that private JSON. It shows dated candidates and remaining checks; it does not enable live prices or basket rankings. The source release includes no retailer captures or private price files.

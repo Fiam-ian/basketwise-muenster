@@ -20,7 +20,7 @@ grocery_account="$(gh api user --jq .login)"
 [[ "$grocery_account" == Fiam-ian ]] || { printf '%s\n' 'Authenticate GitHub CLI as Fiam-ian before publishing.' >&2; exit 1; }
 npm test
 npm run preview
-grocery_assets=(AGENTS.md LICENSE README.md package.json dev-server.mjs .gitignore publish.ps1 index.html styles.css favicon.svg preview.html src tests docs scripts data .github)
+grocery_assets=(AGENTS.md LICENSE README.md package.json dev-server.mjs .gitignore publish.ps1 index.html offers.html styles.css favicon.svg preview.html src tests docs scripts data .github)
 for grocery_asset in "${grocery_assets[@]}"; do
   [[ -e "$grocery_asset" && ! -L "$grocery_asset" ]] || { printf 'Missing or linked release asset: %s\n' "$grocery_asset" >&2; exit 1; }
 done
