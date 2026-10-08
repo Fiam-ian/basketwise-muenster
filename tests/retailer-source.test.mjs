@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, rm, stat, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { EDEKA_PILOT_SOURCE as source, inspectEdekaBranchPage, inspectEdekaProspectPage } from '../src/retailer-source.mjs';
+import { EDEKA_PILOT_SOURCE as source, EDEKA_AASEEMARKT_SOURCE, inspectEdekaBranchPage, inspectEdekaProspectPage } from '../src/retailer-source.mjs';
 import { captureRetailerSource, validateCaptureOutput } from '../scripts/capture-retailer-source.mjs';
 
 const branch = '<section id="angebote-der-woche"><p>Gültig vom <strong>05.10.2026</strong> bis zum <strong>10.10.2026</strong>.</p><p>Marktadresse: EDEKA Rotthowe, Aegidiimarkt 7, 48143 Münster</p><a href="/maerkte/074601/prospekte/#prospekt-test">Prospekt</a></section>';
@@ -27,6 +27,32 @@ test('branch dates are captured without granting item validity, stock or price e
   assert.deepEqual(result.pageAdvertisedWindow, { validFrom: '2026-10-05', validTo: '2026-10-10' });
   assert.equal(result.itemValidityReviewed, false); assert.equal(result.rankingEnabled, false);
   assert.equal(result.inventoryComplete, false);
+});
+test('Aaseemarkt capture requires its own official address and prospect path even for a shared leaflet', async () => {
+  const other = EDEKA_AASEEMARKT_SOURCE;
+  const html = branch.replace('Aegidiimarkt 7, 48143 Münster', 'Von-Witzleben-Str. 10, 48151 Münster').replace('074601', '074835');
+  assert.equal(inspectEdekaBranchPage(html, other).storeId, other.storeId);
+  assert.throws(() => inspectEdekaBranchPage(html));
+  assert.throws(() => inspectEdekaBranchPage(branch, other));
+  const output = newOutput(), calls = [];
+  const fetchImpl = async url => {
+    calls.push(url);
+    return url === other.branchUrl ? new Response(html, { headers: { 'content-type': 'text/html' } })
+      : url === other.prospectUrl ? new Response(prospect, { headers: { 'content-type': 'text/html' } })
+      : url === other.viewerUrl ? new Response('<html>Viewer</html>', { headers: { 'content-type': 'text/html' } })
+      : url === other.pdfUrl ? new Response('%PDF-1.7\nSYNTHETIC', { headers: { 'content-type': 'application/pdf' } })
+      : assert.fail('Unexpected request');
+  };
+  try {
+    const result = await captureRetailerSource(output, { storeId: other.storeId, fetchImpl });
+    assert.equal(result.storeId, other.storeId);
+    assert.deepEqual(calls, [other.branchUrl, other.prospectUrl, other.viewerUrl, other.pdfUrl]);
+    const manifest = JSON.parse(await readFile(output + '/manifest.json', 'utf8'));
+    assert.equal(manifest.sources[0].url, other.branchUrl);
+    calls.length = 0;
+    await assert.rejects(captureRetailerSource(output + '-unknown', { storeId: 'unlisted', fetchImpl }));
+    assert.equal(calls.length, 0);
+  } finally { await rm(output, { recursive: true, force: true }); }
 });
 
 test('branch changes, impossible dates, reversed periods and duplicate sections fail closed', () => {

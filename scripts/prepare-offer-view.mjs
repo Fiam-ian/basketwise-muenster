@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseOfferView } from '../src/offer-view.mjs';
-import { EDEKA_PILOT_SOURCE as source } from '../src/retailer-source.mjs';
+import { retailerSource } from '../src/retailer-source.mjs';
 
 const root = fileURLToPath(new URL('../local-data/', import.meta.url));
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -29,6 +29,7 @@ export async function prepareOfferView(capturePath, outputPath) {
   const manifestBytes = await bounded(resolve(capture, 'manifest.json'), 2 * 1024 * 1024);
   const reviewBytes = await bounded(resolve(capture, 'reviewed-candidates-v1.json'), 2 * 1024 * 1024);
   const manifest = JSON.parse(manifestBytes), review = JSON.parse(reviewBytes);
+  const source = retailerSource(manifest.storeId);
   if (manifest.retailerCaptureVersion !== 1 || manifest.storeId !== source.storeId ||
       review.retailerCandidateReviewVersion !== 1 || review.storeId !== source.storeId ||
       review.captureManifestSha256 !== digest(manifestBytes) || !Array.isArray(manifest.sources) || manifest.sources.length !== 4 ||

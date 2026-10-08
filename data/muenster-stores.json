@@ -6,6 +6,18 @@
   "status": "Address-only source registry; not wired into demonstration comparisons",
   "stores": [
     {
+      "id": "edeka-074835",
+      "chain": "EDEKA",
+      "name": "EDEKA Wiewel Aaseemarkt",
+      "address": { "street": "Von-Witzleben-Str. 10", "postalCode": "48151", "city": "Münster" },
+      "sourceUrl": "https://www.edeka.de/maerkte/074835/",
+      "sourceCheckedOn": "2026-10-08",
+      "coordinates": null,
+      "coordinatesVerified": false,
+      "hoursVerifiedForShoppingDate": false,
+      "eligibleForRouting": false
+    },
+    {
       "id": "rewe-250486",
       "chain": "REWE",
       "name": "REWE Roggenmarkt",

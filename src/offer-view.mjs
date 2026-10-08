@@ -1,4 +1,4 @@
-import { EDEKA_PILOT_SOURCE } from './retailer-source.mjs';
+import { retailerSource } from './retailer-source.mjs';
 
 export const OFFER_VIEW_MAX_BYTES = 2 * 1024 * 1024;
 const fail = () => { throw new Error('Unsupported local offer report.'); };
@@ -15,20 +15,21 @@ export function parseOfferView(input) {
   if (typeof input !== 'string' || new TextEncoder().encode(input).length > OFFER_VIEW_MAX_BYTES) fail();
   let report;
   try { report = JSON.parse(input); } catch { fail(); }
-  if (!report || report.offerViewVersion !== 1 || report.storeId !== EDEKA_PILOT_SOURCE.storeId ||
+  if (!report || report.offerViewVersion !== 1 || typeof report.storeId !== 'string' ||
       report.mode !== 'advertised_candidates' || report.rankingEnabled !== false || report.inventoryComplete !== false ||
       !hash(report.captureManifestSha256) || !hash(report.leafletSha256) ||
       !isOfferDate(report.validFrom) || !isOfferDate(report.validTo) || report.validFrom > report.validTo ||
       typeof report.retrievedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(report.retrievedAt) ||
       !Number.isFinite(Date.parse(report.retrievedAt)) || !text(report.reviewMethod) ||
       !Array.isArray(report.candidates) || report.candidates.length > 100) fail();
+  const source = retailerSource(report.storeId);
   const ids = new Set();
   const candidates = report.candidates.map(value => {
     if (!value || !text(value.id, 120) || ids.has(value.id) || !text(value.category, 60) ||
         !text(value.productName, 200) || !Number.isSafeInteger(value.page) || value.page < 1 || value.page > 100 ||
         !Number.isSafeInteger(value.priceCents) || value.priceCents < 0 || value.priceCents > 1000000 ||
         !Number.isFinite(value.packQuantity) || value.packQuantity <= 0 || value.packQuantity > 1000000 ||
-        !['g', 'ml', 'count'].includes(value.unit) ||
+        !['g', 'ml', 'count'].includes(value.unit) || (value.unit === 'count' && !Number.isSafeInteger(value.packQuantity)) ||
         !(value.depositCents === null || Number.isSafeInteger(value.depositCents) && value.depositCents >= 0 && value.depositCents <= 1000000) ||
         !text(value.conditions) || value.comparisonEligible !== false || !Array.isArray(value.remainingReview) ||
         value.remainingReview.length > 20 || !value.remainingReview.every(item => text(item, 100)) ||
@@ -40,12 +41,24 @@ export function parseOfferView(input) {
       fatBasisPoints: value.fatBasisPoints ?? null,
       remainingReview: [...value.remainingReview], comparisonEligible: false };
   });
-  return { offerViewVersion: 1, storeId: EDEKA_PILOT_SOURCE.storeId,
-    storeName: 'EDEKA Rotthowe Aegidiimarkt', address: 'Aegidiimarkt 7, 48143 Münster',
-    sourceUrl: EDEKA_PILOT_SOURCE.branchUrl, leafletUrl: EDEKA_PILOT_SOURCE.pdfUrl,
+  return { offerViewVersion: 1, storeId: source.storeId,
+    storeName: source.storeId === 'edeka-074601' ? 'EDEKA Rotthowe Aegidiimarkt' : 'EDEKA Wiewel Aaseemarkt',
+    address: source.storeId === 'edeka-074601' ? 'Aegidiimarkt 7, 48143 Münster' : 'Von-Witzleben-Str. 10, 48151 Münster',
+    sourceUrl: source.branchUrl, leafletUrl: source.pdfUrl,
     validFrom: report.validFrom, validTo: report.validTo, retrievedAt: report.retrievedAt,
     captureManifestSha256: report.captureManifestSha256, leafletSha256: report.leafletSha256,
     reviewMethod: report.reviewMethod, candidates, rankingEnabled: false, inventoryComplete: false };
+}
+
+export const OFFER_STARTER_REQUEST = Object.freeze([
+  { category: 'milk', quantity: 2000, unit: 'ml' }, { category: 'pasta', quantity: 750, unit: 'g' },
+  { category: 'eggs', quantity: 6, unit: 'count' }, { category: 'oats', quantity: 500, unit: 'g' },
+  { category: 'tomatoes', quantity: 800, unit: 'g' }, { category: 'water', quantity: 1500, unit: 'ml' }
+].map(item => Object.freeze(item)));
+export function inspectOfferCoverage(reports) {
+  if (!Array.isArray(reports) || reports.length > 2 || new Set(reports.map(report => report.storeId)).size !== reports.length) fail();
+  return OFFER_STARTER_REQUEST.map(item => ({ ...item, branches: reports.map(report => ({ storeId: report.storeId,
+    candidateCount: report.candidates.filter(candidate => candidate.category === item.category).length, comparisonEligibleCount: 0 })) }));
 }
 
 export function offerDateStatus(report, shoppingDate) {

@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, writeFile, readFile, rm, stat } from 'node:fs/promises'
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseOfferView, offerDateStatus } from '../src/offer-view.mjs';
+import { parseOfferView, offerDateStatus, inspectOfferCoverage, OFFER_STARTER_REQUEST } from '../src/offer-view.mjs';
 import { prepareOfferView } from '../scripts/prepare-offer-view.mjs';
 import { EDEKA_PILOT_SOURCE as source } from '../src/retailer-source.mjs';
 
@@ -33,12 +33,27 @@ test('leaflet dates classify past future and boundary shopping dates without usi
 });
 test('unsafe or ambiguous import structures cannot become offers', () => {
   for (const value of [null, {}, { ...report, rankingEnabled: true }, { ...report, storeId: 'edeka-074602' },
-    { ...report, inventoryComplete: true }, { ...report, validTo: '2026-10-01' }, { ...report, validFrom: '2026-02-30' },
+    { ...report, storeId: undefined }, { ...report, inventoryComplete: true }, { ...report, validTo: '2026-10-01' }, { ...report, validFrom: '2026-02-30' },
     { ...report, retrievedAt: 'yesterday' }, { ...report, candidates: [candidate, candidate] },
     ...[{ comparisonEligible: true }, { priceCents: 1.1 }, { unit: 'kg' }, { depositCents: -1 }, { packQuantity: 0 }, { fatBasisPoints: '3.5' }].map(change => ({ ...report, candidates: [{ ...candidate, ...change }] }))]) {
     assert.throws(() => parseOfferView(JSON.stringify(value)));
   }
   assert.throws(() => parseOfferView('x'.repeat(2 * 1024 * 1024 + 1)));
+});
+test('two distinct branch reports retain their identities and candidate counts never become basket coverage', async () => {
+  const first = parseOfferView(JSON.stringify(report));
+  const second = parseOfferView(JSON.stringify({ ...report, storeId: 'edeka-074835', storeName: 'Injected store' }));
+  assert.equal(second.storeName, 'EDEKA Wiewel Aaseemarkt');
+  assert.equal(second.sourceUrl, 'https://www.edeka.de/maerkte/074835/');
+  const coverage = inspectOfferCoverage([first, second]);
+  assert.equal(coverage.length, 6);
+  assert.deepEqual(coverage.find(row => row.category === 'milk').branches.map(branch => branch.candidateCount), [1, 1]);
+  assert.ok(coverage.every(row => row.branches.every(branch => branch.comparisonEligibleCount === 0)));
+  assert.equal(coverage.find(row => row.category === 'eggs').branches[0].candidateCount, 0);
+  assert.throws(() => inspectOfferCoverage([first, first]));
+  assert.throws(() => inspectOfferCoverage([first, second, first]));
+  const request = JSON.parse(await readFile(new URL('../data/pilot-basket.json', import.meta.url), 'utf8'));
+  assert.deepEqual(OFFER_STARTER_REQUEST, request.items.map(({ category, quantity, unit }) => ({ category, quantity, unit })));
 });
 test('offline preparation checks every source hash and review binding, preserves outputs and private source data', async () => {
   const root = fileURLToPath(new URL('../local-data/', import.meta.url));
@@ -69,6 +84,8 @@ test('offline preparation checks every source hash and review binding, preserves
     assert.equal(parseOfferView(saved).candidates.length, 1);
     await assert.rejects(prepareOfferView(directory, output), /exists/);
     assert.equal(await readFile(output, 'utf8'), saved);
+    await writeFile(resolve(directory, 'reviewed-candidates-v1.json'), JSON.stringify({ ...review, storeId: 'edeka-074835' }));
+    await assert.rejects(prepareOfferView(directory, output + '.new'), /do not match/);
     await writeFile(resolve(directory, 'reviewed-candidates-v1.json'), JSON.stringify({ ...review, captureManifestSha256: 'c'.repeat(64) }));
     await assert.rejects(prepareOfferView(directory, output + '.new'), /do not match/);
     await writeFile(resolve(directory, 'reviewed-candidates-v1.json'), JSON.stringify(review));

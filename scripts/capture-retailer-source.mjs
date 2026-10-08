@@ -2,7 +2,7 @@ import { mkdir, writeFile, rm, lstat, realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { EDEKA_PILOT_SOURCE as source, inspectEdekaBranchPage, inspectEdekaProspectPage } from '../src/retailer-source.mjs';
+import { retailerSource, inspectEdekaBranchPage, inspectEdekaProspectPage } from '../src/retailer-source.mjs';
 
 const HTML_LIMIT = 2 * 1024 * 1024, PDF_LIMIT = 20 * 1024 * 1024;
 const localRoot = fileURLToPath(new URL('../local-data/', import.meta.url));
@@ -14,7 +14,8 @@ export function validateCaptureOutput(path) {
 }
 
 /** Four allowlisted public requests, no retries, cookies, private endpoints or fallback prices. */
-export async function captureRetailerSource(outputPath, { fetchImpl = fetch } = {}) {
+export async function captureRetailerSource(outputPath, { fetchImpl = fetch, storeId = 'edeka-074601' } = {}) {
+  const source = retailerSource(storeId);
   const output = validateCaptureOutput(outputPath), snapshots = [];
   if (await realpath(localRoot) !== resolve(localRoot)) throw new Error('Unsupported local data directory.');
   try { await lstat(output); throw new Error('Output already exists.'); }
@@ -39,8 +40,8 @@ export async function captureRetailerSource(outputPath, { fetchImpl = fetch } = 
       retrievedAt: new Date().toISOString(), contentType: type });
     return bytes.toString('utf8');
   }
-  const branch = inspectEdekaBranchPage(await capture(source.branchUrl, 'branch.html'));
-  const prospect = inspectEdekaProspectPage(await capture(source.prospectUrl, 'prospects.html'));
+  const branch = inspectEdekaBranchPage(await capture(source.branchUrl, 'branch.html'), source);
+  const prospect = inspectEdekaProspectPage(await capture(source.prospectUrl, 'prospects.html'), source);
   await capture(source.viewerUrl, 'viewer.html');
   await capture(source.pdfUrl, 'leaflet.pdf', true);
   const manifest = { retailerCaptureVersion: 1, ...branch, ...prospect,
@@ -59,8 +60,8 @@ export async function captureRetailerSource(outputPath, { fetchImpl = fetch } = 
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const args = process.argv.slice(2);
-  if (args.length === 1 && args[0] === '--help') console.log('Capture four public EDEKA 074601 sources: --out NEW_DIRECTORY_UNDER_LOCAL_DATA');
-  else if (args.length !== 2 || args[0] !== '--out') { console.error('Use --out NEW_DIRECTORY_UNDER_LOCAL_DATA'); process.exitCode = 1; }
-  else try { console.log(JSON.stringify(await captureRetailerSource(args[1]))); }
+  if (args.length === 1 && args[0] === '--help') console.log('Capture four public EDEKA sources: --out NEW_DIRECTORY_UNDER_LOCAL_DATA [--store edeka-074601|edeka-074835]');
+  else if (!([2, 4].includes(args.length) && args[0] === '--out' && (args.length === 2 || args[2] === '--store'))) { console.error('Use --out NEW_DIRECTORY_UNDER_LOCAL_DATA [--store STORE_ID]'); process.exitCode = 1; }
+  else try { console.log(JSON.stringify(await captureRetailerSource(args[1], { storeId: args[3] ?? 'edeka-074601' }))); }
   catch { console.error('Retailer capture failed; check public access, source structure and a new local output path.'); process.exitCode = 1; }
 }

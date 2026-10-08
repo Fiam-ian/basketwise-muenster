@@ -10,6 +10,8 @@ For the compact Pluggendorf–Aasee branch pilot and its sequencing, see [neighb
 
 The subsequent direct test of Netto branch 6046 returned 403; indexed/public offer content does not establish direct collection access. Wiewel’s public offers page supplied a current explicitly dated 17-page leaflet, but exact Aaseemarkt applicability remains unreviewed. See [local-offer-view.md](local-offer-view.md) for retained private evidence and the working EDEKA candidate browser view.
 
+The later exact Aaseemarkt check confirmed [EDEKA branch 074835](https://www.edeka.de/maerkte/074835/) and [its prospect page](https://www.edeka.de/maerkte/074835/prospekte/). The implemented collector now captures its explicitly embedded SUUPER supplement. This shares exact PDF bytes with Rotthowe’s capture; both branch candidates are inspectable together. The separate 17-page Wiewel group PDF remains outside branch matching. Full source relationships and gaps are in the local-view document.
+
 | Retailer | Official Münster evidence / source | Current result |
 | --- | --- | --- |
 | REWE | [Roggenmarkt branch](https://www.rewe.de/marktseite/muenster/250486/rewe-markt-roggenmarkt-15-16/) | Branch offers exist; direct/browser 403 observed |
