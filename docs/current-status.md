@@ -137,3 +137,30 @@ Accelerated verification completed after the user added chava to kvm: accel-chec
 Visible Android verification completed too: the WSLg emulator window is mapped, Android boot=1 and ADBonline. The working KVM/software backend remains running; the private local app bridge is restored. REWE's official Play entry is open and requires Google sign-in before installation. User completion on the emulator's own surface is pending; no account credentials were requested or captured. Added run-android-emulator.sh for the verified accelerated configuration. Current source/runtime checks:190tests and desktop/mobile/actualAndroid app interactions pass.
 
 Official REWE app trial now succeeds after private user-completed Play sign-in. Installed package de.rewe.app.mobile version5.18.1; Android first-install compilation delayed launch, then guest startup succeeded. Optional tracking was declined. Manual postcode search selected REWE Geiststr.2–4,48151 Münster and exposed its5–10October prospect and market offers. Guest Milch search returned seven visible named suggestions with pack/fat labels; selecting one added it to the list, without any displayed price. These suggestions do not establish branch inventory or priced alternatives. Private product UI captures are retained in local-data; no retailer login was needed. The existing AVD was restarted after its X connection closed, preserving Play access. Next: structure catalogue metadata separately and review exact-branch advertised prices; complete real baskets remain unavailable. See mobile-app-access.md.
+
+## Priced native catalogue — 8 October 2026
+
+The preserved emulator now runs headlessly; the launcher defaults to no window
+and supports --show-window for required human authentication. REWE guest
+ordering opens a pickup catalogue for Metzer Str.62–64,48151 Münster/Geist.
+This is a different branch and channel from Geiststr.2–4's market offers.
+Six milk-search screens plus two screens for each of Eier,Tomaten,Nudeln,
+Haferflocken,Wasser captured50distinct name/price/display listings. Product
+detail for one milk was visually checked. These are sampled search results,
+not complete inventory, verified stock or basket-eligible prices.
+
+Added bounded native-UI capture and hash/query/package-bound private projection
+scripts. Branch context is explicitly an operator capture-session assertion;
+product screens do not repeat the branch header. Source XML, reports and account
+state remain ignored. The app's advertised-leaflet UI remains separate from this
+new pickup report schema. See android-catalogue.md. Six Python extraction tests
+and the existing190Node tests pass; launcher Bash syntax passes.
+
+User-authorized REWE registration reached email verification after updating
+bundled Chrome83 to official Play version154.0.8037.126. The modern browser's
+normal verification passed. Required personal details and a generated unique
+password remain private; registration is not complete until the six-digit email
+code is accepted. Connected Gmail confirms the verification message arrived,
+but deliberately masks authentication codes. verify-rewe-email.py provides a
+hidden local terminal prompt; human code entry is pending. No order, reservation,
+payment, loyalty enrolment or newsletter subscription was submitted.

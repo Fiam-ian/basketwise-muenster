@@ -15,6 +15,9 @@
     "retailer:capture": "node scripts/capture-retailer-source.mjs",
     "offers:prepare": "node scripts/prepare-offer-view.mjs",
     "leaflet:extract": "node scripts/extract-leaflet-catalogue.mjs",
+    "catalogue:android:extract": "python3 scripts/extract-android-catalogue.py",
+    "catalogue:android:capture": "python3 scripts/capture-android-catalogue.py",
+    "test:android-catalogue": "python3 -m unittest discover -s tests/python",
     "delivery:capture": "node scripts/capture-wolt-listings.mjs",
     "shops:discover": "node scripts/discover-shops.mjs"
   },

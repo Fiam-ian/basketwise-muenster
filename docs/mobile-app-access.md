@@ -155,7 +155,8 @@ Once no existing instance is running, launch from the project root with:
 prototype/scripts/run-android-emulator.sh
 ```
 
-Add `-no-window` for headless capture. This script preserves the device, requires
+Headless capture is now the default; add `--show-window` only for required human
+authentication or verification. This script preserves the device, requires
 acceleration, and uses updated group membership explicitly when needed.
 Do not launch another instance on top of the running AVD. Official REWE
 installation still requires access to Google Play on the virtual device; no
@@ -199,3 +200,30 @@ Next: retain structured suggestion metadata separately from price evidence,
 then capture and review the selected branch's advertised product details.
 The native app route works, but complete inventory and cheapest-basket
 eligibility remain unverified.
+
+## Background priced catalogue and registration
+
+Headless operation preserves the installed app and account state. REWE's
+Bestellen → Abholservice postcode search48151 returned nine pickup branches;
+Metzer Str.62–64 was selected explicitly. Its pickup catalogue allows search
+and displayed prices before login. The bounded six-query capture now has50
+distinct listing identities; see android-catalogue.md. Never assign these
+pickup prices to the separate Geiststr.2–4 shelf-offer context.
+
+The user authorized account creation and supplied the required details privately.
+The emulator's bundled Chrome83 stalled on normal registration verification;
+official Play updated it to154.0.8037.126, which passed that check. Registration
+then reached email verification. The generated password is in owner-only ignored
+local-data/rewe-account/credentials.json; its status is email_verification_pending.
+Connected Gmail received the verification email but masks one-time codes. The
+user can enter the code locally, without showing the emulator or posting it:
+
+```sh
+cd /home/chava/Projects/groceries-compare
+python3 prototype/scripts/verify-rewe-email.py
+```
+
+The helper checks that the expected code controls are present, hides the prompt,
+verifies all six digits were entered before submission and removes its temporary
+device UI snapshot. It does not store the code. Registration/login remain pending
+until REWE accepts it; the priced guest catalogue remains independently usable.
