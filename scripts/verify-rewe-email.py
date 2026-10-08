@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 import re
 import subprocess
+import time
 import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[2]
@@ -45,6 +46,15 @@ try:
     if actual != code:
         raise RuntimeError('The verification fields did not receive the complete code; nothing submitted.')
     code = ''
+    for attempt in range(4):
+        has_check = any('Turnstile' in n.get('text', '') for n in current)
+        check_passed = any('Überprüfung des Browsers war erfolgreich' in n.get('text', '') for n in current)
+        if not has_check or check_passed:
+            break
+        if attempt == 3:
+            raise RuntimeError('REWE browser verification is still pending; nothing submitted. Ask the agent to check it.')
+        time.sleep(2)
+        current = nodes()
     button = next(n for n in current if n.get('class') == 'android.widget.Button' and n.get('text') == 'Bestätigen')
     tap(button)
     print('Verification submitted. The agent will check whether it succeeded.')

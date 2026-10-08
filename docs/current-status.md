@@ -164,3 +164,14 @@ code is accepted. Connected Gmail confirms the verification message arrived,
 but deliberately masks authentication codes. verify-rewe-email.py provides a
 hidden local terminal prompt; human code entry is pending. No order, reservation,
 payment, loyalty enrolment or newsletter subscription was submitted.
+
+Account verification subsequently completed using the user-provided code through
+the hidden local prompt and REWE's normal confirmation control. The native
+account menu shows Abmelden and the supplied account name, confirming login.
+Private credential status is authenticated; no account identity or code is
+published. The release's190Node and6Python tests also passed in GitHub CI:
+https://github.com/Fiam-ian/basketwise-muenster/actions/runs/37818134756.
+The reusable capture CLI then completed a fresh authenticated one-screen milk
+trial at the retained pickup branch; its private projection contains four
+listings. This checks the collector after login and is a separate snapshot,
+not four extra unique products added to the 50-listing sample.

@@ -2,18 +2,21 @@
 
 REWE's official Android app exposes priced pickup product search without a
 retailer login after choosing a pickup market. The tested market is Metzer
-Str.62–64,48151 Münster/Geist. This is separate from the earlier selected
-Geiststr.2–4 shelf-offer context. Pickup and shelf prices must not be merged.
+Str. 62–64, 48151 Münster/Geist. This is separate from the earlier selected
+Geiststr. 2–4 shelf-offer context. Pickup and shelf prices must not be merged.
 
-The first bounded capture covers six Milch-search screens and16distinct
+The first bounded capture covers six Milch-search screens and 16 distinct
 name/price/display records, including dairy and plant drinks. One product
-detail was visually checked: REWE Bio H-Vollmilch3.8%,1litre,125cents,
-ultra-high-temperature treated and homogenised, brandREWE Bio. Neither that
+detail was visually checked: REWE Bio H-Vollmilch 3.8%, 1 litre, 125 cents,
+ultra-high-temperature treated and homogenised, brand REWE Bio. Neither that
 example nor the search sample establishes complete inventory or current stock.
-An additional two-screen sample per query captured6egg,8tomato,8pasta,6oat
-and6water listings:50distinct display identities across all six queries.
+An additional two-screen sample per query captured 6 egg, 8 tomato, 8 pasta,
+6 oat and 6 water listings: 50 distinct display identities across all six queries.
 Search results can include related products; a query does not certify product
 category or suitability. All remain comparison-ineligible.
+After login, the reusable CLI captured one further milk-search screen and its
+four listings successfully. This is a separate snapshot of the same catalogue,
+not four extra products added to the sample count.
 
 ## Extraction
 

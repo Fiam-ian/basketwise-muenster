@@ -227,3 +227,9 @@ The helper checks that the expected code controls are present, hides the prompt,
 verifies all six digits were entered before submission and removes its temporary
 device UI snapshot. It does not store the code. Registration/login remain pending
 until REWE accepts it; the priced guest catalogue remains independently usable.
+
+The user subsequently provided the code, which was entered through the hidden
+terminal prompt. After REWE's normal browser check passed, confirmation returned
+to the native app. Its menu shows Abmelden and the supplied account name:
+registration and native login are verified. Private credential status is now
+authenticated. No code, email, name or account screenshot is published.
