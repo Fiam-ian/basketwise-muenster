@@ -21,3 +21,12 @@ Only configured immediate-child JSON files under the real `local-data` directory
 The five retained source products come from seven branch listings. Shared publication listings merge only when their commercial fields agree; every branch's original review record stays separate. This is captured listing identity, not a verified global SKU. Different packs, prices, periods/publications or ambiguous fields must not become automatic equivalents. Selections are exact listing choices; cheaper substitutions need reviewed canonical matching before totals.
 
 Basket quantities are counts of the selected listing; uncertain priced packs remain visibly unresolved. The basket reports selected listing coverage per imported branch and date. It computes no incomplete or unreviewed total, never transfers demo prices into a real basket, and never infers inventory/stock from leaflet data. Catalogue reload/import preserves basket selections; missing source records are labelled.
+
+## Android emulator verification
+
+The same interface now runs in actual Android11/Chrome83 through a private
+ADBreverse localhost bridge. Visual checks confirm the catalogue, product
+selection and one merged milk line with quantity2 and both branch cards. Added
+compatible DOM replacement/string handling, vh fallbacks and explicit flex
+spacing for this browser. The shell remains a PWA rather than an APK; native
+retailer app installation is a separate Google Play account step.

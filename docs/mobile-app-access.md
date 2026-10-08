@@ -127,3 +127,44 @@ sg kvm -c 'prototype/scripts/android-sandbox.sh emulator -avd basketwise-api30 -
 Verify KVM API/VM creation, Android completed boot and display/capture separately.
 Neither group membership nor a successful accel-check alone certifies a usable
 retailer-app runtime. No Windows feature change or host reboot was made.
+
+## Accelerated runtime verified
+
+The user completed the group change. Native `getent group kvm` lists chava;
+`sg kvm` permits KVM API12 access and successful VM creation. Emulator accel-check
+returns0 and reports KVM installed and usable. The preserved API30 device then
+completed a hardware-accelerated headless boot at roughly49seconds: ADB reports
+`device`, and `sys.boot_completed` returns1. A captured launcher image was
+inspected. Google Play and Chrome are installed by the official image; no Google
+or retailer account is signed in.
+
+The local app was opened through `adb reverse tcp:8013 tcp:8013` at
+`http://localhost:8013/app.html`. Actual Android Chrome83 displayed all five
+retained product cards. Selecting the shared milk twice produced one basket
+line with quantity2 and both branches retained. Screenshots are private.
+Compatibility fixes remove dependence on replaceChildren/replaceAll and provide
+older-browser viewport/flex spacing fallbacks.
+
+The visible KVM/software-rendered WSLg launch also completed boot. Xwininfo
+confirms a mapped Android Emulator window (480x854); ADB remains online and
+sys.boot_completed is1. The earlier software-only SwiftShader crashes do not
+describe this verified mode.
+Once no existing instance is running, launch from the project root with:
+
+```sh
+prototype/scripts/run-android-emulator.sh
+```
+
+Add `-no-window` for headless capture. This script preserves the device, requires
+acceleration, and uses updated group membership explicitly when needed.
+Do not launch another instance on top of the running AVD. Official REWE
+installation still requires access to Google Play on the virtual device; no
+account credentials are collected by these scripts.
+
+REWE's official Play deep link was opened in the visible emulator. Its initial
+entry shows Sign in, no Install button, and no network-error label. Google Play
+authentication is the next dependency. The user was asked to complete it privately
+using an account designated for the project; no password/code/account identity
+is collected in chat. No post-login account screen has been captured. Retailer
+app installation, selected-market catalogue and shelf-price availability are
+still unverified. The local Android browser test needs no Google account.

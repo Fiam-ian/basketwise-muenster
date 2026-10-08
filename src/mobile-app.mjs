@@ -3,6 +3,7 @@ import { buildProductPicker, searchPickerProducts, addPickedProduct, changePicke
 import { parseOfferView, OFFER_VIEW_MAX_BYTES, isOfferDate } from './offer-view.mjs';
 const $ = id => document.getElementById(id);
 const el = (tag, text, className) => { const node = document.createElement(tag); if (text != null) node.textContent = text; if (className) node.className = className; return node; };
+const replace = (element, ...children) => { element.textContent = ''; element.append(...children); };
 const money = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
 const artFor = (product, className) => { const art = el('div', undefined, className); art.append(foodIcon(product.category)); return art; };
 const categories = [['', 'All'], ['milk', 'Milk'], ['pasta', 'Pasta'], ['tomatoes', 'Produce'], ['water', 'Drinks'], ['eggs', 'Eggs'], ['oats', 'Breakfast']];
@@ -23,7 +24,7 @@ function add(product) {
   catch { $('app-status').textContent = 'Maximum 99 of one listing and 50 distinct selections.'; }
 }
 function detail(product) {
-  const content = $('detail-content'); content.replaceChildren(el('h2', product.name), artFor(product, `product-art art-${product.category}`), el('p', packLabel(product), 'product-meta'));
+  const content = $('detail-content'); replace(content, el('h2', product.name), artFor(product, `product-art art-${product.category}`), el('p', packLabel(product), 'product-meta'));
   const button = el('button', 'Add to basket', 'primary'); button.type = 'button'; button.addEventListener('click', () => { add(product); $('product-detail').close(); }); content.append(button);
   content.append(el('p', 'Captured advertisement. Stock and equivalent cheaper alternatives are not verified.', 'muted'));
   for (const listing of product.listings) {
@@ -31,7 +32,7 @@ function detail(product) {
     const details = el('details'), summary = el('summary', 'Source & outstanding checks'); details.append(summary,
       el('p', listing.candidate.depositCents == null ? 'Pfand unknown; checkout total unavailable.' : `Recorded Pfand: ${money.format(listing.candidate.depositCents / 100)}; review pending.`),
       el('p', listing.candidate.packAmbiguity ?? 'Priced pack and product equivalence require review.'),
-      el('p', `Captured ${listing.retrievedAt}. ${listing.leafletLabel}.`), el('p', listing.candidate.remainingReview.join(', ').replaceAll('_', ' ')));
+      el('p', `Captured ${listing.retrievedAt}. ${listing.leafletLabel}.`), el('p', listing.candidate.remainingReview.join(', ').split('_').join(' ')));
     const link = el('a', 'Official branch page'); link.href = listing.sourceUrl; link.target = '_blank'; link.rel = 'noopener noreferrer'; details.append(link); card.append(details); content.append(card);
   }
   $('product-detail').showModal();
@@ -45,7 +46,7 @@ function renderProducts() {
   const matches = searchPickerProducts(products, $('product-search').value, category);
   $('catalogue-count').textContent = `${matches.length} ${matches.length === 1 ? 'product' : 'products'}`;
   $('catalogue-note').textContent = reports.length ? `Partial leaflet catalogue · ${new Set(reports.map(report => report.storeId)).size} branches · captured offers, not live stock.` : 'No local product data loaded. Open Stores → Local data to load reports.';
-  $('product-grid').replaceChildren(); $('catalogue-empty').hidden = matches.length > 0;
+  replace($('product-grid')); $('catalogue-empty').hidden = matches.length > 0;
   for (const product of matches) {
     const card = el('article', undefined, 'product-card'), open = el('button', undefined, 'product-open'); open.type = 'button'; open.setAttribute('aria-label', `View ${product.name}`);
     const art = artFor(product, `product-art art-${product.category}`); art.setAttribute('aria-hidden', 'true'); open.append(art, el('h3', product.name), el('p', packLabel(product), 'product-meta')); open.addEventListener('click', () => detail(product)); card.append(open);
@@ -57,7 +58,7 @@ function renderProducts() {
   }
 }
 function renderBasket() {
-  $('basket-lines').replaceChildren(); $('basket-empty').hidden = !!basket.length; $('basket-comparison').hidden = !basket.length;
+  replace($('basket-lines')); $('basket-empty').hidden = !!basket.length; $('basket-comparison').hidden = !basket.length;
   const total = basket.reduce((sum, line) => sum + line.count, 0); $('basket-badge').textContent = total; $('basket-badge').hidden = !total;
   for (const line of basket) {
     const row = el('article', undefined, 'basket-row'), art = artFor(line.product, 'basket-art'); art.setAttribute('aria-hidden', 'true'); row.append(art);
@@ -71,7 +72,7 @@ function renderBasket() {
     }
     info.append(stepper); row.append(info); $('basket-lines').append(row);
   }
-  $('basket-branches').replaceChildren();
+  replace($('basket-branches'));
   if (!basket.length) return;
   if (!isOfferDate($('app-shopping-date').value)) { $('basket-branches').append(el('p', 'Choose a valid shopping date.')); return; }
   const coverage = pickedBasketCoverage(reports, basket, $('app-shopping-date').value);
@@ -81,7 +82,7 @@ function renderBasket() {
   }
 }
 function renderStores() {
-  $('store-list').replaceChildren();
+  replace($('store-list'));
   const branches = [...new Map(reports.map(report => [report.storeId, report])).values()];
   for (const branch of branches) {
     const card = el('article', undefined, 'store-card'); card.append(el('h3', branch.storeName), el('p', branch.address), el('span', 'Captured leaflet offers', 'store-tag')); $('store-list').append(card);
