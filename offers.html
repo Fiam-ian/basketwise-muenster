@@ -9,8 +9,27 @@
 <body>
   <header class="site-header"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">b.</span><span>basketwise<span class="brand-sub">MÜNSTER PILOT</span></span></a><span class="demo-pill">LOCAL OFFER INSPECTION</span></header>
   <main>
-    <section class="intro" aria-labelledby="offer-title"><p class="eyebrow">PLUGGENDORF–AASEE / TWO BRANCHES</p><h1 id="offer-title">Look at the <br><span>local offers.</span></h1><p class="intro-copy">Inspect dated leaflet candidates across the pilot branches. See the pack, advertised price and checks still needed.</p></section>
+    <section class="intro" aria-labelledby="offer-title"><p class="eyebrow">PLUGGENDORF–AASEE / TWO BRANCHES</p><h1 id="offer-title">Build your list.<br><span>Explore local offers.</span></h1><p class="intro-copy">Inspect dated leaflet candidates across the pilot branches. See the pack, advertised price and checks still needed.</p></section>
     <aside class="demo-notice"><p><strong>A captured leaflet is a snapshot.</strong> This view is not a live price feed. Offers do not guarantee stock, and candidates do not establish basket savings or product equivalence. Imported reviews are local assertions.</p></aside>
+    <section class="panel" aria-labelledby="list-title">
+      <h2 id="list-title">Your grocery list</h2>
+      <p>Search six starter groceries in English or German. These are shopping requests, not a store inventory. Your list stays in this tab until reload.</p>
+      <form id="list-form">
+        <label class="field">Search groceries<input id="list-search" type="search" maxlength="100" placeholder="Milch, pasta, Eier…"></label>
+        <div class="control-grid"><label class="field">Choose a grocery<select id="list-intent"></select></label><label class="field">Quantity <span id="list-unit"></span><input id="list-quantity" type="number" min="1" max="1000000" step="1" required></label></div>
+        <label class="field">Required brand (optional)<input id="list-brand" maxlength="80" placeholder="Any brand accepted"></label>
+        <div id="list-milk" class="control-grid">
+          <label class="field">Milk source<select id="list-source"><option value="">Any source accepted</option><option value="cow">Cow milk only</option></select></label>
+          <label class="field">Fat<select id="list-fat"><option value="">Any fat accepted</option><option value="150">1.5%</option><option value="350">3.5%</option></select></label>
+          <label class="field">Processing<select id="list-processing"><option value="">Fresh or UHT accepted</option><option value="fresh">Fresh only</option><option value="uht">UHT only</option></select></label>
+        </div>
+        <button id="list-add" class="button" type="submit">Add to list</button>
+      </form>
+      <p id="list-status" role="status" aria-live="polite"></p>
+      <div id="list-lines"></div>
+      <p id="basket-status" class="quiet-note">Add groceries to see which imported branches have offer leads.</p>
+      <button id="list-clear" class="button" type="button" hidden>Clear grocery list</button>
+    </section>
     <section class="panel" aria-labelledby="import-title">
       <div class="panel-heading"><h2 id="import-title">Open your local offer report</h2><span class="card-badge">Local only</span></div>
       <label class="field" for="offer-file">Offer-view JSON files<input id="offer-file" type="file" accept=".json,application/json" multiple></label>

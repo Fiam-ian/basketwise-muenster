@@ -1,3 +1,4 @@
+import { GROCERY_INTENTS, searchGroceryIntents, createShoppingRequest, addShoppingRequest, removeShoppingRequest, shoppingRequestLabel, findShoppingCandidateLeads } from './shopping-list.mjs';
 import { parseOfferView, OFFER_VIEW_MAX_BYTES, offerDateStatus, isOfferDate, inspectOfferCoverage } from './offer-view.mjs';
 const byId = id => document.getElementById(id);
 const node = (tag, text, className) => {
@@ -10,13 +11,15 @@ const money = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR
 const quantity = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 3 });
 const dateParts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
 byId('offer-date').value = ['year', 'month', 'day'].map(type => dateParts.find(part => part.type === type).value).join('-');
-let reports = [], generation = 0;
+let reports = [], generation = 0, shoppingList = [];
+
 function empty() {
   reports = [];
   for (const id of ['offer-cards', 'offer-source', 'offer-coverage']) byId(id).replaceChildren();
   byId('offer-source').hidden = true;
   byId('offer-coverage').hidden = true;
   byId('offer-clear').hidden = true;
+  renderList();
   byId('offer-category').replaceChildren(new Option('All categories', ''));
   byId('offer-branch').replaceChildren(new Option('All imported branches', ''));
 }
@@ -74,7 +77,7 @@ function render() {
     }
   }
   source.append(node('p', 'The preparation tool checks snapshot hashes. Importing JSON does not authenticate its assertions or recheck the original sources.', 'quiet-note'));
-  source.hidden = false; renderCoverage();
+  source.hidden = false; renderCoverage(); renderList();
 }
 byId('offer-file').addEventListener('change', async event => {
   const token = ++generation, files = [...(event.target.files ?? [])]; empty();
@@ -96,3 +99,61 @@ byId('offer-file').addEventListener('change', async event => {
 });
 byId('offer-clear').addEventListener('click', () => { ++generation; empty(); byId('offer-file').value = ''; byId('offer-status').textContent = 'Offers cleared. Choose local reports to begin.'; });
 for (const id of ['offer-date', 'offer-category', 'offer-branch']) byId(id).addEventListener('change', render);
+
+function chooseIntent() {
+  const intent = GROCERY_INTENTS.find(item => item.id === byId('list-intent').value);
+  byId('list-add').disabled = !intent;
+  byId('list-milk').hidden = intent?.id !== 'milk';
+  byId('list-unit').textContent = intent ? `(${intent.unit === 'count' ? 'pieces' : intent.unit})` : '';
+  byId('list-quantity').value = intent?.defaultQuantity ?? '';
+}
+function searchIntents() {
+  const matches = searchGroceryIntents(byId('list-search').value);
+  byId('list-intent').replaceChildren(...matches.map(item => new Option(item.label, item.id)));
+  if (!matches.length) byId('list-intent').append(new Option('No starter grocery matches', ''));
+  chooseIntent();
+}
+function renderList() {
+  const area = byId('list-lines'); area.replaceChildren();
+  shoppingList.forEach((request, index) => {
+    const section = node('section', undefined, 'shopping-line');
+    section.append(node('h3', shoppingRequestLabel(request)));
+    const label = node('label', 'Requested quantity', 'field');
+    const input = node('input'); input.type = 'number'; input.min = '1'; input.max = '1000000'; input.step = '1'; input.value = request.quantity;
+    input.setAttribute('aria-label', `Quantity in ${request.unit} for ${shoppingRequestLabel(request)}`);
+    input.addEventListener('change', () => {
+      try {
+        const updated = createShoppingRequest(request.category, { ...request.constraints, quantity: Number(input.value) });
+        shoppingList = shoppingList.map((line, position) => position === index ? updated : line); renderList();
+        byId('list-status').textContent = 'Quantity updated.';
+      } catch { input.value = request.quantity; byId('list-status').textContent = 'Enter a positive whole quantity up to 1,000,000.'; }
+    });
+    label.append(input, node('span', request.unit === 'count' ? 'pieces' : request.unit)); section.append(label);
+    const leads = findShoppingCandidateLeads(reports, request);
+    if (!leads.length) section.append(node('p', reports.length ? 'No captured category leads. This does not mean the stores lack this grocery.' : 'Load local offer reports below to see nearby leads.'));
+    for (const lead of leads) {
+      const report = reports.find(item => item.storeId === lead.storeId && item.leafletId === lead.leafletId);
+      const mismatch = request.constraints.fatBasisPoints != null && lead.candidate.fatBasisPoints != null && request.constraints.fatBasisPoints !== lead.candidate.fatBasisPoints;
+      section.append(node('p', `${lead.storeName}: ${lead.candidate.productName} · ${money.format(lead.candidate.priceCents / 100)} advertised · ${offerDateStatus(report, byId('offer-date').value)}. ${mismatch ? 'Recorded fat differs from your request. ' : ''}Category lead only; brand, preferences, pack, conditions and Pfand are not verified for this request.`));
+    }
+    const remove = node('button', 'Remove', 'button'); remove.type = 'button'; remove.setAttribute('aria-label', `Remove ${shoppingRequestLabel(request)}`);
+    remove.addEventListener('click', () => { shoppingList = removeShoppingRequest(shoppingList, index); renderList(); byId('list-status').textContent = 'Grocery removed.'; });
+    section.append(remove); area.append(section);
+  });
+  byId('list-clear').hidden = !shoppingList.length;
+  byId('basket-status').textContent = shoppingList.length ? `${shoppingList.length} requested lines. Cheapest basket unavailable: imported leads have unresolved matching and checkout evidence. Missing lines never count as zero.` : 'Add groceries to see which imported branches have offer leads.';
+}
+byId('list-search').addEventListener('input', searchIntents);
+byId('list-intent').addEventListener('change', chooseIntent);
+byId('list-form').addEventListener('submit', event => {
+  event.preventDefault();
+  try {
+    const options = { quantity: Number(byId('list-quantity').value), brand: byId('list-brand').value };
+    if (byId('list-intent').value === 'milk') Object.assign(options, { milkSource: byId('list-source').value, fatBasisPoints: byId('list-fat').value ? Number(byId('list-fat').value) : undefined, processing: byId('list-processing').value });
+    shoppingList = addShoppingRequest(shoppingList, createShoppingRequest(byId('list-intent').value, options));
+    renderList(); byId('list-status').textContent = 'Added to your list. Identical requests combine quantities.';
+  } catch { byId('list-status').textContent = 'Choose a starter grocery and a positive whole quantity. The list supports up to 50 distinct requests.'; }
+});
+byId('list-clear').addEventListener('click', () => { shoppingList = []; renderList(); byId('list-status').textContent = 'Grocery list cleared.'; });
+byId('offer-date').addEventListener('change', renderList);
+searchIntents(); renderList();
