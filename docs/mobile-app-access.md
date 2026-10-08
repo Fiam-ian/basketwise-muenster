@@ -168,3 +168,34 @@ using an account designated for the project; no password/code/account identity
 is collected in chat. No post-login account screen has been captured. Retailer
 app installation, selected-market catalogue and shelf-price availability are
 still unverified. The local Android browser test needs no Google account.
+
+## Official REWE trial completed
+
+After the user completed Google Play authentication privately, the official
+listing exposed Install. Installed `de.rewe.app.mobile`, version5.18.1,
+versionCode54501, x86_64, minSdk29. First launch waited for Android's
+`dex2oat` compilation; subsequent launch opened successfully. Optional tracking
+was declined with Allow only necessary. No retailer login was needed.
+
+The earlier visible instance ended after its WSL X connection closed. Restarting
+the existing AVD preserved Google Play access. Keep that device; do not recreate
+it to recover a closed display.
+
+Manual postcode search48151 returned the exact REWE Markt, Geiststr.2–4,
+48151 Münster. Selecting it showed that address in the offers header and the
+current prospect period05.10.–10.10.; the adjacent next-week prospect was
+12.10.–17.10. These periods label the prospect, not every unrelated list item.
+
+Guest shopping-list search for Milch returned seven visible named milk
+suggestions, including explicit source labels for brand, fat percentage and
+one-litre packs. Selecting Hemme Milch Frische Vollmilch3,7%1l added a list
+entry. Tapping the entry marked it completed; it did not open priced details.
+No prices appeared on the inspected search/list surfaces. These are catalogue
+suggestions, not verified branch inventory or shelf-price observations.
+
+Product/branch UI captures remain ignored under local-data/android-rewe-*.xml;
+no account screen, password, email or authentication code is published.
+Next: retain structured suggestion metadata separately from price evidence,
+then capture and review the selected branch's advertised product details.
+The native app route works, but complete inventory and cheapest-basket
+eligibility remain unverified.
