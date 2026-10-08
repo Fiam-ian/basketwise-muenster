@@ -9,7 +9,12 @@ export const EDEKA_PILOT_SOURCE = Object.freeze({
 export const EDEKA_AASEEMARKT_SOURCE = Object.freeze({ ...EDEKA_PILOT_SOURCE,
   storeId: 'edeka-074835', branchUrl: 'https://www.edeka.de/maerkte/074835/',
   prospectUrl: 'https://www.edeka.de/maerkte/074835/prospekte/' });
-export function retailerSource(storeId = EDEKA_PILOT_SOURCE.storeId) {
+export function retailerSource(storeId = EDEKA_PILOT_SOURCE.storeId, leafletId = 'supplement') {
+  if (leafletId === 'primary' && storeId === EDEKA_AASEEMARKT_SOURCE.storeId)
+    return Object.freeze({ ...EDEKA_AASEEMARKT_SOURCE, leafletId: 'primary',
+      viewerUrl: 'https://blaetterkatalog.edeka.de/RHEINRUHR/Stroetmann_25/index.html',
+      pdfUrl: 'https://blaetterkatalog.edeka.de/RHEINRUHR/Stroetmann_25/blaetterkatalog/pdf/complete.pdf' });
+  if (leafletId !== 'supplement') throw new Error('Unsupported retailer leaflet.');
   if (storeId === EDEKA_PILOT_SOURCE.storeId) return EDEKA_PILOT_SOURCE;
   if (storeId === EDEKA_AASEEMARKT_SOURCE.storeId) return EDEKA_AASEEMARKT_SOURCE;
   throw new Error('Unsupported retailer branch.');
@@ -30,7 +35,7 @@ function checkHtml(html) {
 
 /** Recognizes one reviewed branch template; never treats page dates as item validity. */
 export function inspectEdekaBranchPage(html, source = EDEKA_PILOT_SOURCE) {
-  source = retailerSource(source.storeId);
+  source = retailerSource(source.storeId, source.leafletId);
   checkHtml(html);
   const sections = [...html.matchAll(/<section\b[^>]*\bid=["']angebote-der-woche["'][^>]*>([\s\S]*?)<\/section>/g)];
   if (sections.length !== 1) reject();
@@ -53,7 +58,7 @@ export function inspectEdekaBranchPage(html, source = EDEKA_PILOT_SOURCE) {
 
 /** Require the exact publicly linked pilot viewer, not an inferred regional match. */
 export function inspectEdekaProspectPage(html, source = EDEKA_PILOT_SOURCE) {
-  source = retailerSource(source.storeId);
+  source = retailerSource(source.storeId, source.leafletId);
   checkHtml(html);
   const viewers = [...html.matchAll(/<iframe\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g)].map(match => match[1]);
   if (!viewers.includes(source.viewerUrl)) reject();

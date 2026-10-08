@@ -29,9 +29,10 @@ export async function prepareOfferView(capturePath, outputPath) {
   const manifestBytes = await bounded(resolve(capture, 'manifest.json'), 2 * 1024 * 1024);
   const reviewBytes = await bounded(resolve(capture, 'reviewed-candidates-v1.json'), 2 * 1024 * 1024);
   const manifest = JSON.parse(manifestBytes), review = JSON.parse(reviewBytes);
-  const source = retailerSource(manifest.storeId);
+  const leafletId = manifest.leafletId ?? 'supplement';
+  const source = retailerSource(manifest.storeId, leafletId);
   if (manifest.retailerCaptureVersion !== 1 || manifest.storeId !== source.storeId ||
-      review.retailerCandidateReviewVersion !== 1 || review.storeId !== source.storeId ||
+      review.retailerCandidateReviewVersion !== 1 || review.storeId !== source.storeId || (review.leafletId ?? 'supplement') !== leafletId ||
       review.captureManifestSha256 !== digest(manifestBytes) || !Array.isArray(manifest.sources) || manifest.sources.length !== 4 ||
       review.validFrom !== manifest.pageAdvertisedWindow?.validFrom || review.validTo !== manifest.pageAdvertisedWindow?.validTo)
     throw new Error('Capture and review do not match.');

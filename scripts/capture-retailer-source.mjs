@@ -14,8 +14,8 @@ export function validateCaptureOutput(path) {
 }
 
 /** Four allowlisted public requests, no retries, cookies, private endpoints or fallback prices. */
-export async function captureRetailerSource(outputPath, { fetchImpl = fetch, storeId = 'edeka-074601' } = {}) {
-  const source = retailerSource(storeId);
+export async function captureRetailerSource(outputPath, { fetchImpl = fetch, storeId = 'edeka-074601', leafletId = 'supplement' } = {}) {
+  const source = retailerSource(storeId, leafletId);
   const output = validateCaptureOutput(outputPath), snapshots = [];
   if (await realpath(localRoot) !== resolve(localRoot)) throw new Error('Unsupported local data directory.');
   try { await lstat(output); throw new Error('Output already exists.'); }
@@ -44,7 +44,7 @@ export async function captureRetailerSource(outputPath, { fetchImpl = fetch, sto
   const prospect = inspectEdekaProspectPage(await capture(source.prospectUrl, 'prospects.html'), source);
   await capture(source.viewerUrl, 'viewer.html');
   await capture(source.pdfUrl, 'leaflet.pdf', true);
-  const manifest = { retailerCaptureVersion: 1, ...branch, ...prospect,
+  const manifest = { retailerCaptureVersion: 1, leafletId, ...branch, ...prospect,
     sourceDataLicence: 'Retailer content; reuse rights not established, retained locally for review',
     sources: snapshots.map(({ bytes, ...metadata }) => ({ ...metadata, bytes: bytes.length })),
     priceCandidateCount: 0, captureOnly: true };
@@ -54,14 +54,20 @@ export async function captureRetailerSource(outputPath, { fetchImpl = fetch, sto
       await writeFile(resolve(output, snapshot.filename), snapshot.bytes, { flag: 'wx', mode: 0o600 });
     await writeFile(resolve(output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
   } catch (error) { await rm(output, { recursive: true, force: true }); throw error; }
-  return { storeId: source.storeId, capturedSources: snapshots.length,
+  return { storeId: source.storeId, leafletId, capturedSources: snapshots.length,
     pageAdvertisedWindow: branch.pageAdvertisedWindow, rankingEnabled: false, inventoryComplete: false };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const args = process.argv.slice(2);
-  if (args.length === 1 && args[0] === '--help') console.log('Capture four public EDEKA sources: --out NEW_DIRECTORY_UNDER_LOCAL_DATA [--store edeka-074601|edeka-074835]');
-  else if (!([2, 4].includes(args.length) && args[0] === '--out' && (args.length === 2 || args[2] === '--store'))) { console.error('Use --out NEW_DIRECTORY_UNDER_LOCAL_DATA [--store STORE_ID]'); process.exitCode = 1; }
-  else try { console.log(JSON.stringify(await captureRetailerSource(args[1], { storeId: args[3] ?? 'edeka-074601' }))); }
-  catch { console.error('Retailer capture failed; check public access, source structure and a new local output path.'); process.exitCode = 1; }
+  if (args.length === 1 && args[0] === '--help') console.log('Use --out NEW_DIRECTORY_UNDER_LOCAL_DATA [--store STORE_ID] [--leaflet supplement|primary]. Primary is supported only for Aaseemarkt.');
+  else try {
+    const options = new Map();
+    for (let i = 0; i < args.length; i += 2) {
+      if (!['--out', '--store', '--leaflet'].includes(args[i]) || options.has(args[i]) || !args[i + 1] || args[i + 1].startsWith('--')) throw new Error('Arguments');
+      options.set(args[i], args[i + 1]);
+    }
+    if (!options.has('--out')) throw new Error('Arguments');
+    console.log(JSON.stringify(await captureRetailerSource(options.get('--out'), { storeId: options.get('--store') ?? 'edeka-074601', leafletId: options.get('--leaflet') ?? 'supplement' })));
+  } catch { console.error('Retailer capture failed; check arguments, public access, source structure and a new local output path.'); process.exitCode = 1; }
 }

@@ -55,6 +55,23 @@ test('two distinct branch reports retain their identities and candidate counts n
   const request = JSON.parse(await readFile(new URL('../data/pilot-basket.json', import.meta.url), 'utf8'));
   assert.deepEqual(OFFER_STARTER_REQUEST, request.items.map(({ category, quantity, unit }) => ({ category, quantity, unit })));
 });
+test('main and supplement reports aggregate by branch without conflating publications or pack evidence', () => {
+  const first = parseOfferView(JSON.stringify(report));
+  const second = parseOfferView(JSON.stringify({ ...report, storeId: 'edeka-074835' }));
+  const primary = parseOfferView(JSON.stringify({ ...report, storeId: 'edeka-074835', leafletId: 'primary', candidates: [
+    { ...candidate, id: 'water', category: 'water', packAmbiguity: 'Bottle text and multipack picture conflict.', depositDisplay: 'Per-bottle deposit; total unknown.' }
+  ] }));
+  assert.match(primary.leafletUrl, /Stroetmann_25/);
+  assert.equal(primary.candidates[0].depositCents, null);
+  assert.match(primary.candidates[0].packAmbiguity, /conflict/);
+  const coverage = inspectOfferCoverage([first, second, primary]);
+  assert.equal(coverage[0].branches.length, 2);
+  assert.equal(coverage.find(row => row.category === 'water').branches[1].candidateCount, 1);
+  assert.throws(() => inspectOfferCoverage([second, primary, primary]));
+  assert.throws(() => parseOfferView(JSON.stringify({ ...report, leafletId: 'primary' })));
+  assert.throws(() => parseOfferView(JSON.stringify({ ...report, leafletId: 'invented' })));
+  assert.throws(() => parseOfferView(JSON.stringify({ ...report, candidates: [{ ...candidate, packAmbiguity: {} }] })));
+});
 test('offline preparation checks every source hash and review binding, preserves outputs and private source data', async () => {
   const root = fileURLToPath(new URL('../local-data/', import.meta.url));
   await mkdir(root, { recursive: true });
@@ -84,6 +101,8 @@ test('offline preparation checks every source hash and review binding, preserves
     assert.equal(parseOfferView(saved).candidates.length, 1);
     await assert.rejects(prepareOfferView(directory, output), /exists/);
     assert.equal(await readFile(output, 'utf8'), saved);
+    await writeFile(resolve(directory, 'reviewed-candidates-v1.json'), JSON.stringify({ ...review, leafletId: 'primary' }));
+    await assert.rejects(prepareOfferView(directory, output + '.new'), /do not match/);
     await writeFile(resolve(directory, 'reviewed-candidates-v1.json'), JSON.stringify({ ...review, storeId: 'edeka-074835' }));
     await assert.rejects(prepareOfferView(directory, output + '.new'), /do not match/);
     await writeFile(resolve(directory, 'reviewed-candidates-v1.json'), JSON.stringify({ ...review, captureManifestSha256: 'c'.repeat(64) }));

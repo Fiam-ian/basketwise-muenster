@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, rm, stat, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { EDEKA_PILOT_SOURCE as source, EDEKA_AASEEMARKT_SOURCE, inspectEdekaBranchPage, inspectEdekaProspectPage } from '../src/retailer-source.mjs';
+import { EDEKA_PILOT_SOURCE as source, EDEKA_AASEEMARKT_SOURCE, retailerSource, inspectEdekaBranchPage, inspectEdekaProspectPage } from '../src/retailer-source.mjs';
 import { captureRetailerSource, validateCaptureOutput } from '../scripts/capture-retailer-source.mjs';
 
 const branch = '<section id="angebote-der-woche"><p>Gültig vom <strong>05.10.2026</strong> bis zum <strong>10.10.2026</strong>.</p><p>Marktadresse: EDEKA Rotthowe, Aegidiimarkt 7, 48143 Münster</p><a href="/maerkte/074601/prospekte/#prospekt-test">Prospekt</a></section>';
@@ -67,6 +67,27 @@ test('prospect viewer must be the explicitly allowlisted linked resource', () =>
   assert.equal(inspectEdekaProspectPage(prospect).leafletValidityReviewed, false);
   assert.throws(() => inspectEdekaProspectPage(prospect.replace('blaetterkatalog.edeka.de', 'example.invalid')));
   assert.throws(() => inspectEdekaProspectPage('x'.repeat(2 * 1024 * 1024 + 1)));
+});
+test('primary capture requires the branch-linked primary viewer and cannot substitute the supplement', async () => {
+  const primary = retailerSource('edeka-074835', 'primary');
+  const html = branch.replace('Aegidiimarkt 7, 48143 Münster', 'Von-Witzleben-Str. 10, 48151 Münster').replace('074601', '074835');
+  assert.throws(() => inspectEdekaProspectPage(prospect, primary));
+  assert.throws(() => retailerSource('edeka-074601', 'primary'));
+  const output = newOutput(), calls = [];
+  try {
+    await captureRetailerSource(output, { storeId: primary.storeId, leafletId: 'primary', fetchImpl: async url => {
+      calls.push(url);
+      if (url === primary.branchUrl) return new Response(html, { headers: { 'content-type': 'text/html' } });
+      if (url === primary.prospectUrl) return new Response(`<iframe src="${primary.viewerUrl}"></iframe>`, { headers: { 'content-type': 'text/html' } });
+      if (url === primary.viewerUrl) return new Response('Viewer', { headers: { 'content-type': 'text/html' } });
+      if (url === primary.pdfUrl) return new Response('%PDF-1.7\nPRIMARY', { headers: { 'content-type': 'application/pdf' } });
+      assert.fail('Unlisted network target');
+    } });
+    assert.deepEqual(calls, [primary.branchUrl, primary.prospectUrl, primary.viewerUrl, primary.pdfUrl]);
+    const manifest = JSON.parse(await readFile(output + '/manifest.json', 'utf8'));
+    assert.equal(manifest.leafletId, 'primary');
+    assert.equal(manifest.sources[3].url, primary.pdfUrl);
+  } finally { await rm(output, { recursive: true, force: true }); }
 });
 
 test('capture retains exact source hashes in private files and refuses existing output before requests', async () => {

@@ -22,7 +22,8 @@ export function parseOfferView(input) {
       typeof report.retrievedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T/.test(report.retrievedAt) ||
       !Number.isFinite(Date.parse(report.retrievedAt)) || !text(report.reviewMethod) ||
       !Array.isArray(report.candidates) || report.candidates.length > 100) fail();
-  const source = retailerSource(report.storeId);
+  const leafletId = report.leafletId ?? 'supplement';
+  const source = retailerSource(report.storeId, leafletId);
   const ids = new Set();
   const candidates = report.candidates.map(value => {
     if (!value || !text(value.id, 120) || ids.has(value.id) || !text(value.category, 60) ||
@@ -33,15 +34,18 @@ export function parseOfferView(input) {
         !(value.depositCents === null || Number.isSafeInteger(value.depositCents) && value.depositCents >= 0 && value.depositCents <= 1000000) ||
         !text(value.conditions) || value.comparisonEligible !== false || !Array.isArray(value.remainingReview) ||
         value.remainingReview.length > 20 || !value.remainingReview.every(item => text(item, 100)) ||
+        !(value.packAmbiguity == null || text(value.packAmbiguity, 500)) || !(value.depositDisplay == null || text(value.depositDisplay, 200)) ||
         !(value.fatBasisPoints == null || Number.isSafeInteger(value.fatBasisPoints) && value.fatBasisPoints >= 0 && value.fatBasisPoints <= 10000)) fail();
     ids.add(value.id);
     return { id: value.id, category: value.category, productName: value.productName, page: value.page,
       priceCents: value.priceCents, packQuantity: value.packQuantity, unit: value.unit,
       depositCents: value.depositCents, conditions: value.conditions,
       fatBasisPoints: value.fatBasisPoints ?? null,
+      packAmbiguity: value.packAmbiguity ?? null, depositDisplay: value.depositDisplay ?? null,
       remainingReview: [...value.remainingReview], comparisonEligible: false };
   });
-  return { offerViewVersion: 1, storeId: source.storeId,
+  return { offerViewVersion: 1, storeId: source.storeId, leafletId,
+    leafletLabel: leafletId === 'primary' ? 'Main weekly leaflet' : 'SUUPER supplement',
     storeName: source.storeId === 'edeka-074601' ? 'EDEKA Rotthowe Aegidiimarkt' : 'EDEKA Wiewel Aaseemarkt',
     address: source.storeId === 'edeka-074601' ? 'Aegidiimarkt 7, 48143 Münster' : 'Von-Witzleben-Str. 10, 48151 Münster',
     sourceUrl: source.branchUrl, leafletUrl: source.pdfUrl,
@@ -56,9 +60,10 @@ export const OFFER_STARTER_REQUEST = Object.freeze([
   { category: 'tomatoes', quantity: 800, unit: 'g' }, { category: 'water', quantity: 1500, unit: 'ml' }
 ].map(item => Object.freeze(item)));
 export function inspectOfferCoverage(reports) {
-  if (!Array.isArray(reports) || reports.length > 2 || new Set(reports.map(report => report.storeId)).size !== reports.length) fail();
-  return OFFER_STARTER_REQUEST.map(item => ({ ...item, branches: reports.map(report => ({ storeId: report.storeId,
-    candidateCount: report.candidates.filter(candidate => candidate.category === item.category).length, comparisonEligibleCount: 0 })) }));
+  if (!Array.isArray(reports) || reports.length > 3 || new Set(reports.map(report => `${report.storeId}:${report.leafletId ?? 'supplement'}`)).size !== reports.length) fail();
+  const stores = [...new Set(reports.map(report => report.storeId))];
+  return OFFER_STARTER_REQUEST.map(item => ({ ...item, branches: stores.map(storeId => ({ storeId,
+    candidateCount: reports.filter(report => report.storeId === storeId).reduce((count, report) => count + report.candidates.filter(candidate => candidate.category === item.category).length, 0), comparisonEligibleCount: 0 })) }));
 }
 
 export function offerDateStatus(report, shoppingDate) {

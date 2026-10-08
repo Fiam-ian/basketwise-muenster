@@ -27,7 +27,7 @@ function renderCoverage() {
   const table = node('table', undefined, 'offer-coverage-table');
   table.append(node('caption', 'Six staple requests and captured category candidates'));
   const head = node('tr'); head.append(node('th', 'Requested item'));
-  for (const report of reports) head.append(node('th', report.storeName));
+  for (const storeId of [...new Set(reports.map(report => report.storeId))]) head.append(node('th', reports.find(report => report.storeId === storeId).storeName));
   const thead = node('thead'); thead.append(head); table.append(thead);
   const tbody = node('tbody');
   for (const line of inspectOfferCoverage(reports)) {
@@ -48,22 +48,25 @@ function render() {
   const category = byId('offer-category').value, branch = byId('offer-branch').value;
   const selected = reports.filter(report => !branch || branch === report.storeId);
   const candidateCount = selected.reduce((sum, report) => sum + report.candidates.filter(item => !category || item.category === category).length, 0);
-  byId('offer-status').textContent = `${candidateCount} ${candidateCount === 1 ? 'candidate' : 'candidates'} shown across ${selected.length} ${selected.length === 1 ? 'branch' : 'branches'}. ${selected.map(report => `${report.storeName}: ${offerDateStatus(report, shoppingDate)}`).join('. ')}. Comparison checks remain open.`;
+  const branchCount = new Set(selected.map(report => report.storeId)).size;
+  byId('offer-status').textContent = `${candidateCount} ${candidateCount === 1 ? 'candidate' : 'candidates'} shown across ${branchCount} ${branchCount === 1 ? 'branch' : 'branches'} and ${selected.length} leaflets. ${selected.map(report => `${report.storeName} (${report.leafletLabel}): ${offerDateStatus(report, shoppingDate)}`).join('. ')}. Comparison checks remain open.`;
   const source = byId('offer-source'); source.replaceChildren();
   if (reports.length > 1 && new Set(reports.map(report => report.leafletSha256)).size < reports.length)
     source.append(node('p', 'Shared leaflet: these reports identify the same captured publication. Repeated candidates are not independent price evidence. This alone does not demonstrate savings between branches.', 'audit-warning'));
   for (const report of selected) {
     const group = node('section');
-    group.append(node('h2', report.storeName), node('p', report.address),
+    group.append(node('h2', report.storeName), node('p', `${report.address} · ${report.leafletLabel}`),
       node('p', `Recorded leaflet period: ${report.validFrom} to ${report.validTo}. Captured: ${report.retrievedAt}.`));
     const link = node('a', 'Open the official branch page');
     link.href = report.sourceUrl; link.target = '_blank'; link.rel = 'noopener noreferrer'; group.append(link); source.append(group);
     for (const item of report.candidates.filter(item => !category || item.category === category)) {
       const card = node('article', undefined, 'panel offer-card');
-      card.append(node('p', `${report.storeName} · ${item.category} · leaflet page ${item.page}`, 'eyebrow'),
+      card.append(node('p', `${report.storeName} · ${report.leafletLabel} · ${item.category} · page ${item.page}`, 'eyebrow'),
         node('h2', item.productName), node('p', money.format(item.priceCents / 100), 'offer-price'),
         node('p', offerDateStatus(report, shoppingDate)),
-        node('p', `Pack: ${quantity.format(item.packQuantity)} ${item.unit === 'count' ? 'pieces' : item.unit}. Quantity basis requires review.`),
+        node('p', `Source quantity: ${quantity.format(item.packQuantity)} ${item.unit === 'count' ? 'pieces' : item.unit}. Priced pack and quantity basis require review.`),
+        ...(item.packAmbiguity ? [node('p', item.packAmbiguity, 'audit-warning')] : []),
+        ...(item.depositDisplay ? [node('p', `Source Pfand wording: ${item.depositDisplay}`)] : []),
         node('p', item.depositCents === null ? 'Pfand: unknown; checkout total unavailable.' : `Recorded Pfand: ${money.format(item.depositCents / 100)}. Review required before comparison.`),
         ...(item.fatBasisPoints === null ? [] : [node('p', `Recorded fat: ${quantity.format(item.fatBasisPoints / 100)}%. Milk source and acceptable substitution still require review.`)]),
         node('p', item.conditions), node('p', `Remaining checks: ${item.remainingReview.length ? item.remainingReview.map(value => value.replaceAll('_', ' ')).join(', ') : 'No listed checks; comparison remains disabled in this inspection view.'}`, 'quiet-note'));
@@ -78,17 +81,17 @@ byId('offer-file').addEventListener('change', async event => {
   if (!files.length) { byId('offer-status').textContent = 'Choose local offer reports to begin.'; return; }
   byId('offer-status').textContent = 'Reading local reports…'; byId('offer-clear').hidden = false;
   try {
-    if (files.length > 2 || files.some(file => file.size > OFFER_VIEW_MAX_BYTES)) throw new Error('Size');
+    if (files.length > 3 || files.some(file => file.size > OFFER_VIEW_MAX_BYTES)) throw new Error('Size');
     const parsed = await Promise.all(files.map(async file => parseOfferView(await file.text())));
     if (token !== generation) return;
-    inspectOfferCoverage(parsed); // Reject duplicate branch snapshots before changing state.
+    inspectOfferCoverage(parsed); // Reject duplicate branch/leaflet snapshots before changing state.
     reports = parsed;
     for (const category of [...new Set(reports.flatMap(report => report.candidates.map(item => item.category)))].sort()) byId('offer-category').append(new Option(category, category));
-    for (const report of reports) byId('offer-branch').append(new Option(report.storeName, report.storeId));
+    for (const storeId of [...new Set(reports.map(report => report.storeId))]) byId('offer-branch').append(new Option(reports.find(report => report.storeId === storeId).storeName, storeId));
     render();
   } catch {
     if (token !== generation) return;
-    empty(); byId('offer-status').textContent = 'Could not read these offer reports. Choose up to two supported JSON files, one per branch, up to 2 MiB each. No file contents were displayed.';
+    empty(); byId('offer-status').textContent = 'Could not read these offer reports. Choose up to three supported JSON files, one per branch and leaflet, up to 2 MiB each. No file contents were displayed.';
   }
 });
 byId('offer-clear').addEventListener('click', () => { ++generation; empty(); byId('offer-file').value = ''; byId('offer-status').textContent = 'Offers cleared. Choose local reports to begin.'; });
