@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#173e36"><meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Basketwise · Grocery app</title>
+  <link rel="icon" href="./favicon.svg"><link rel="manifest" href="./app.webmanifest"><link rel="stylesheet" href="./app.css">
+  <script type="module" src="./src/mobile-app.mjs"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header"><div class="wordmark"><span aria-hidden="true">b.</span>basketwise</div><button id="location-button" class="location" type="button">Münster ⌄</button></header>
+    <main>
+      <section id="screen-explore" class="screen" aria-labelledby="explore-title">
+        <div class="screen-heading"><p class="eyebrow">YOUR NEIGHBOURHOOD SHOP</p><h1 id="explore-title">What’s on your list?</h1><p>Find a product. Tap to add it.</p></div>
+        <label class="search-box"><span aria-hidden="true">⌕</span><span class="sr-only">Search products or brands</span><input id="product-search" type="search" maxlength="100" placeholder="Milk, Barilla, tomatoes…" autocomplete="off"></label>
+        <div id="category-chips" class="chips" role="group" aria-label="Grocery categories"></div>
+        <div class="section-row"><h2>Captured products</h2><span id="catalogue-count"></span></div>
+        <p id="catalogue-note" class="muted">Loading local catalogue…</p>
+        <div id="product-grid" class="product-grid"></div>
+        <div id="catalogue-empty" class="empty-card" hidden><h2>No products found</h2><p>Try another product or brand.</p></div>
+      </section>
+      <section id="screen-basket" class="screen" aria-labelledby="basket-title" hidden>
+        <div class="screen-heading"><p class="eyebrow">READY WHEN YOU ARE</p><h1 id="basket-title">Your basket</h1><p>Products you picked, with quantities you can change.</p></div>
+        <div id="basket-lines"></div><div id="basket-empty" class="empty-card"><span class="empty-icon" aria-hidden="true">♧</span><h2>Start with one thing.</h2><p>Browse the catalogue and add what you need.</p><button class="primary" id="browse-products" type="button">Find groceries</button></div>
+        <div id="basket-comparison" hidden><div class="section-row"><h2>Across your stores</h2></div><label class="date-field">Shopping date<input id="app-shopping-date" type="date" required></label><div id="basket-branches"></div><aside class="comparison-note"><strong>Basket price isn’t ready yet.</strong><p>These captured offers still need product, pack, conditions and Pfand checks. Missing products never count as €0.</p></aside><button id="clear-basket" class="text-button" type="button">Clear basket</button></div>
+      </section>
+      <section id="screen-stores" class="screen" aria-labelledby="stores-title" hidden>
+        <div class="screen-heading"><p class="eyebrow">PLUGGENDORF · AASEE</p><h1 id="stores-title">Your stores</h1><p>A small neighbourhood pilot.</p></div><div id="store-list"></div>
+        <details class="settings"><summary>Local data & app settings</summary><p>Captured advertisements are a partial catalogue, not live stock. Your basket stays in this session. The installable shell can open offline; retailer data and your basket are never cached.</p><button id="reload-catalogue" class="secondary" type="button">Refresh local catalogue</button><button id="install-app" class="secondary" type="button" hidden>Install Basketwise</button><p id="install-note" class="muted">Install from your browser’s app menu when available.</p><details><summary>Load another private report</summary><label>Offer report files<input id="app-report-files" type="file" accept=".json,application/json" multiple></label><p class="muted">Up to three reports; kept in memory on this device.</p></details><p><a href="./offers.html">Source inspection workspace</a></p></details>
+      </section>
+    </main>
+    <p id="app-status" class="status" role="status" aria-live="polite"></p>
+    <nav class="bottom-nav" aria-label="App navigation"><button type="button" data-screen="explore" aria-current="page"><span aria-hidden="true">⌕</span>Explore</button><button type="button" data-screen="basket"><span aria-hidden="true">▤</span>Basket <span id="basket-badge" class="badge" hidden>0</span></button><button type="button" data-screen="stores"><span aria-hidden="true">⌂</span>Stores</button></nav>
+  </div>
+  <dialog id="product-detail"><button id="close-detail" class="close-button" type="button" aria-label="Close product details">×</button><div id="detail-content"></div></dialog>
+</body>
+</html>

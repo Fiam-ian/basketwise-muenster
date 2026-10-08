@@ -1,8 +1,15 @@
 # Münster Grocery Planner
 
-A dependency-free, mobile web prototype for comparing a shopping list across
-one or two shops. This first release uses **fictional shops and synthetic prices**.
-It does not find live Münster bargains or provide verified walking routes.
+A local, installable grocery app prototype with product search, catalogue cards,
+a basket and store screens. The primary app displays private captured branch
+advertisements when configured; its catalogue is partial and does not yet
+compute real basket totals. The separate optimizer demo uses **fictional shops
+and synthetic prices**. Neither supplies live stock or verified walking routes.
+
+See [app interface](docs/app-interface.md) for the populated local sandbox and
+installation, [native app access](docs/mobile-app-access.md) for the Android
+acquisition setup, and [leaflet catalogue extraction](docs/leaflet-catalogue.md)
+for the full-publication review queue.
 
 ## Offline preview
 
@@ -21,7 +28,7 @@ From this directory (the workspace's prototype/ folder), run:
 npm run dev
 ```
 
-Open http://127.0.0.1:8000. Serve the app over HTTP; opening index.html directly
+Open http://127.0.0.1:8000/app.html; the fictional demo is at index.html. Serve the app over HTTP; opening index.html directly
 with a file URL will not reliably load browser ES modules.
 
 ```sh

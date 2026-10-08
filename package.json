@@ -14,6 +14,7 @@
     "catalog:build": "node scripts/build-local-catalog.mjs",
     "retailer:capture": "node scripts/capture-retailer-source.mjs",
     "offers:prepare": "node scripts/prepare-offer-view.mjs",
+    "leaflet:extract": "node scripts/extract-leaflet-catalogue.mjs",
     "delivery:capture": "node scripts/capture-wolt-listings.mjs",
     "shops:discover": "node scripts/discover-shops.mjs"
   },

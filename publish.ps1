@@ -22,7 +22,7 @@ node --test
 if ($LASTEXITCODE -ne 0) { throw 'Tests failed; publication stopped.' }
 git init -b main
 if ($LASTEXITCODE -ne 0) { throw 'Git initialization failed.' }
-git add -- AGENTS.md LICENSE README.md package.json dev-server.mjs .gitignore publish.ps1 index.html offers.html styles.css favicon.svg src tests docs scripts data .github preview.html
+git add -- AGENTS.md LICENSE README.md package.json dev-server.mjs .gitignore publish.ps1 index.html offers.html app.html app.css app.webmanifest app-sw.mjs app-icon-192.png app-icon-512.png styles.css favicon.svg src tests docs scripts data .github preview.html
 if ($LASTEXITCODE -ne 0) { throw 'Staging failed.' }
 git commit -m 'Add Münster grocery-planner demonstration prototype'
 if ($LASTEXITCODE -ne 0) { throw 'Commit failed. Configure Git author identity and retry manually.' }
