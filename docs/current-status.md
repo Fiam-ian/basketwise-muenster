@@ -201,3 +201,10 @@ outputs. Dates, deposit totals, stock and branch review remain unresolved.
 Run npm run catalogue:aldi:extract -- --capture-dir local-data/<capture>
 --output local-data/<new-report>.json. The Android extractor suite passes ten
 tests, including four ALDI adapter checks.
+
+The resumed Lidl trial subsequently succeeded in manual postcode search (48151).
+Selected Münster-Friedrich-Ebert-Straße, Friedrich-Ebert-Str.17,48153; native
+branch marker DE5054. Confirmed the ordinary selection dialog and reached guest
+Home/Prospekte/Lidl Plus/Onlineshop/Konto navigation. No account was required for
+this step. Product/price acquisition remains pending; branch selection alone
+establishes neither inventory nor price applicability.
