@@ -295,3 +295,26 @@ files. Separate basket bytes do not show the branch/channel header, so the
 projection retains unknown channel and unverified applicability. Council review
 corrected count semantics and channel assumptions before integration. The corrected
 private report preserves its earlier version. All 205 Node and 29 Python tests pass.
+
+## Published charges and ALDI exact detail — 9 October 2026
+
+Reviewed REWE general pickup terms and official branch operator evidence for
+Metzer Straße. Added a conservative fee-policy diagnostic: conditional published
+service fee and per-box deposit stay separate, exact-threshold disagreement
+remains unresolved, and unknown first-order eligibility/box count prevents
+assuming zero charges. The actual private quote-bound review retains these
+unknowns. See pickup-fee-policy.md for official sources and scope. Direct REWE
+HTML access returned 403 and was stopped; no source-byte hash is invented.
+
+ALDI Android home/settings/leaflet navigation did not expose a store selector.
+The official Catharina-Müller-Straße branch page loads in Chromium; clicking its
+normal select button after declining optional cookies produced no confirmed
+selection. Existing 50 Android listings remain unmapped. Fresh search and detail
+screens for one exact assortment milk explicitly show a litre pack and 1.5% fat;
+retained private hashes and annotations bind it to its original native reference.
+No cross-retailer equivalence, deposit treatment or stock follows. No new account,
+location permission, reservation or order was introduced.
+
+The integrated slice passes 211 Node and 29 Python tests. Public source contains
+the policy diagnostic, synthetic fixtures and sanitized decisions; raw quotes,
+ALDI details, account state and private annotations stay ignored.

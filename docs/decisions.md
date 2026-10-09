@@ -128,3 +128,11 @@ and mentions deposit transport boxes. Its displayed sum is a provisional
 subtotal, not a resolved checkout price. Missing product-Pfand amounts, box
 deposits and service fees remain separate unknowns. Source inspection must
 restore trial additions and cannot silently reserve a slot or submit an order.
+
+## Published pickup policy and second-store review — 9 October 2026
+
+Review published service charges separately from slot-specific quotes. Record
+branch operator applicability, first-order uncertainty and transport-box count
+explicitly; preserve conflicting exact thresholds. A new account does not certify
+promotional eligibility. An official ALDI address and a store-select button do
+not link unmapped Android prices to that branch without a successful selection.
