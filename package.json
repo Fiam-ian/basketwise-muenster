@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Honest basket comparisons for a Münster grocery-planning pilot",
+  "description": "Honest basket comparisons for a M\u00fcnster grocery-planning pilot",
   "scripts": {
     "dev": "node dev-server.mjs",
     "test": "node --test",
@@ -19,7 +19,8 @@
     "catalogue:android:capture": "python3 scripts/capture-android-catalogue.py",
     "test:android-catalogue": "python3 -m unittest discover -s tests/python",
     "delivery:capture": "node scripts/capture-wolt-listings.mjs",
-    "shops:discover": "node scripts/discover-shops.mjs"
+    "shops:discover": "node scripts/discover-shops.mjs",
+    "catalogue:aldi:extract": "python3 scripts/extract-aldi-app-catalogue.py"
   },
   "engines": {
     "node": ">=22"

@@ -175,3 +175,29 @@ The reusable capture CLI then completed a fresh authenticated one-screen milk
 trial at the retained pickup branch; its private projection contains four
 listings. This checks the collector after login and is a separate snapshot,
 not four extra unique products added to the 50-listing sample.
+
+## Additional retailer-app trials — 8–9 October 2026
+
+Installed EDEKA, Netto Marken-Discount, Lidl Plus and ALDI Nord through official
+Google Play in the preserved private Android device. Installation does not
+establish catalogue access. EDEKA's manual 48151/Muenster search returned no
+markets; Netto's 48151 search returned a technical-content error. Neither trial
+selected a Münster branch. Lidl was switched to Germany/Deutsch and reached
+branch selection; catalogue acquisition remains pending. No additional retailer
+account was created, and optional tracking was declined.
+
+ALDI Nord guest search succeeded. Six bounded queries (milk, eggs, tomatoes,
+pasta, oats and water) yielded 50 distinct native listing references: 26 ordinary
+assortment cards and 24 promotion cards. These are search results, not six
+verified categories or a complete inventory. Exact branch applicability remains
+unknown. Hash-pinned XML and projections stay in ignored local-data; nothing
+from this capture enters the app's catalogue or basket ranking automatically.
+
+The new scripts/extract-aldi-app-catalogue.py preserves visible title, brand,
+pack wording, primary price in integer cents, unit-price wording, footnotes and
+flags. It excludes reference prices and ambiguous/hidden price fields, verifies
+source hashes and query identity, retains conflicts, and writes exclusive private
+outputs. Dates, deposit totals, stock and branch review remain unresolved.
+Run npm run catalogue:aldi:extract -- --capture-dir local-data/<capture>
+--output local-data/<new-report>.json. The Android extractor suite passes ten
+tests, including four ALDI adapter checks.

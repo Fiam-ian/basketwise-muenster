@@ -83,3 +83,13 @@ Implement the local searchable request list independently of retailer authentica
 Use a product-first, installable app interface rather than exposing product-attribute forms to shoppers. Let captured catalogue selections carry their recorded attributes, then edit counts. Keep technical provenance/review controls within settings or a separate workspace. The current implementation is a PWA shell, not an Android APK; native packaging remains a later deployment choice.
 
 At the user's request, pursue an isolated WSL Android emulator despite missing acceleration; preserve host settings and private device/account state. Installation, Android boot, official retailer-app access and complete branch inventory are separate milestones. Continue full-publication leaflet extraction as a review queue alongside this route, without promoting automated amount anchors to verified products or checkout totals.
+
+## Native multi-retailer acquisition — 9 October 2026
+
+Use guest access before additional registration. Separate app installation,
+branch selection and successful product acquisition. ALDI Nord native assortment
+and promotion cards are useful catalogue candidates, but an unmapped branch
+cannot supply Münster shelf prices. Keep native listing references distinct from
+canonical products and preserve promotion conditions without automatic validity
+or deposit inference. EDEKA/Netto location failures do not prove absence of shops
+or products. Raw Android captures and account state remain private and ignored.
