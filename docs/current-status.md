@@ -278,3 +278,20 @@ requirements per selection and no totals/ranking. Sample demands are diagnostic,
 not the user's basket. Council review found and corrected linked-root/input path
 handling and pre-read report bounds; unsupported pack/deposit edits are rejected.
 The native suite passes 205 Node tests and 21 Python tests. See price-review-gaps.md.
+
+## REWE pre-slot basket quote — 9 October 2026
+
+A normal one-pack trial reached the retained pickup basket without choosing a
+slot. The source exposes merchandise unit/line amounts and a displayed subtotal,
+but the packing row says “Kein Termin gewählt” and a notice mentions deposit
+transport boxes. Final checkout cost, packing fee and product/box deposits remain
+unknown. Removed the trial pack and verified the retailer basket is empty;
+no reservation or order was made. Raw quote/restoration XML and hashes stay private.
+
+Added `npm run pickup:quote:extract` for the observed single-line/single-pack
+pre-slot layout. It rejects unsupported counts, conflicting amounts, wrong
+package/layout, unsafe XML and linked private input paths; outputs are new 0600
+files. Separate basket bytes do not show the branch/channel header, so the
+projection retains unknown channel and unverified applicability. Council review
+corrected count semantics and channel assumptions before integration. The corrected
+private report preserves its earlier version. All 205 Node and 29 Python tests pass.

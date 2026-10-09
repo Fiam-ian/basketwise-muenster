@@ -139,3 +139,33 @@ cannot resolve those requirements by turning manual flags on. Reviewed detail
 annotations are a separate private artifact; importing them into an eligibility
 engine requires a future structured evidence contract. Pack/deposit placeholders
 in this draft remain null, and unsupported edits are rejected.
+
+## Pre-slot basket evidence
+
+A reversible one-pack trial at the retained REWE pickup branch reached the
+basket without reserving a slot. Its merchandise line exposes an ordinary
+unit amount, quantity and line amount. The packing-fee row instead states
+“Kein Termin gewählt”; the basket also mentions deposit transport boxes.
+Neither the displayed sum nor missing product-Pfand wording establishes zero
+charges. Keep the provisional displayed subtotal separate from an unresolved
+checkout total, product deposit, transport-box deposit and packing fee.
+
+The source XML and its hash remain private. The single trial pack was removed
+and the empty basket verified afterward. No slot was reserved or order placed.
+This improves evidence about the quote's limitations; it does not resolve the
+three-product review's checkout eligibility or branch applicability.
+
+The bounded extractor supports this observed single-line, single-pack layout:
+
+```sh
+npm run pickup:quote:extract -- \
+  --capture-dir rewe-basket-quote-v1 \
+  --output rewe-basket-quote-report-next.json
+```
+
+It checks source bounds, package, row relationships and agreement between the
+item, subtotal and checkout-button amounts, then writes a new owner-only private
+report. Checkout total, both deposit fields and packing fee remain null. The
+basket screen itself has no pickup header, so its channel is not independently
+established by the extractor; separate capture-session context remains an
+operator assertion. Unsupported layouts fail rather than implying coverage.

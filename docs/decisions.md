@@ -119,3 +119,12 @@ Stop a retailer verification route when it rejects the device; account submissio
 and code entry are not successful login. Supported web-account entry may be checked
 normally, but HTTP denial also stops that route. Preserve the actual failed status
 without inventing account success or authenticated catalogue coverage.
+
+## Pre-slot pickup quotes — 9 October 2026
+
+REWE allows a reversible basket addition before selecting a pickup slot. The
+retained basket explicitly leaves its packing-fee row at “Kein Termin gewählt”
+and mentions deposit transport boxes. Its displayed sum is a provisional
+subtotal, not a resolved checkout price. Missing product-Pfand amounts, box
+deposits and service fees remain separate unknowns. Source inspection must
+restore trial additions and cannot silently reserve a slot or submit an order.
