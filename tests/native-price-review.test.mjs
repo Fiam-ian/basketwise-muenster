@@ -49,7 +49,7 @@ async function cliFixture(t) {
  await mkdir(join(root, 'scripts')); await mkdir(join(root, 'src'));
  const project = fileURLToPath(new URL('../', import.meta.url));
  await cp(join(project, 'scripts/audit-native-price-review.mjs'), join(root, 'scripts/audit-native-price-review.mjs'));
- for (const name of ['native-price-review.mjs', 'native-app-data.mjs', 'offer-view.mjs', 'retailer-source.mjs']) await cp(join(project, 'src', name), join(root, 'src', name));
+ for (const name of ['native-price-review.mjs', 'native-app-data.mjs', 'lidl-app-data.mjs', 'offer-view.mjs', 'retailer-source.mjs']) await cp(join(project, 'src', name), join(root, 'src', name));
  const run = args => spawnSync(process.execPath, [join(root, 'scripts/audit-native-price-review.mjs'), ...args], { encoding: 'utf8' });
  const args = ['--report', 'source.json', '--requests', JSON.stringify([request]), '--selection', JSON.stringify([{ ...request, reportOrdinal: 0, productIndex: 0 }]), '--draft-output', 'draft.json'];
  return { root, run, args };

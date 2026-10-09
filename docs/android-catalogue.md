@@ -96,7 +96,11 @@ The adapter requires the checked Meine Filiale filter, supports the observed
 expanded and collapsed offers headers, and verifies separate branch headers
 before and after. Preserve raw yearless date ranges. Explicit Normalpreis,
 Lidl Plus and reference amounts are separate fields; priceCents stays null.
-These records remain a private review queue outside the primary app.
+The primary app can now project these records for search and exact selection.
+Ordinary and Lidl Plus amounts remain separately labelled; absent ordinary
+amounts show “Price needs review” without a loyalty/reference fallback. Reference
+amounts, literal pack/conditions and yearless periods appear in expandable offer
+details. This display support does not resolve checkout eligibility.
 
 ```sh
 npm run catalogue:lidl:capture -- \
@@ -119,10 +123,12 @@ From prototype, with the project-local Node runtime on PATH:
 npm run app:pilot
 ```
 
-This launcher chooses up to 15 known pilot report basenames when present under
+This launcher chooses up to 16 known pilot report basenames when present under
 local-data. It never scans account directories. The actual retained configuration
-loads 105 distinct selections: five leaflet products,50 REWEpickup listings and
-50 ALDIapp listings. A public checkout without these private reports starts empty.
+loads 142 distinct selections: five leaflet products, 50 REWEpickup listings,
+50 ALDIapp listings and 37 Lidl offer records. The Lidl sample includes nonfood
+products; no grocery category is inferred from it. A public checkout without
+these private reports starts empty.
 Use PORT to change the loopback port. General npm run dev remains configurable
 through BASKETWISE_REPORTS, now bounded at 16 reports/300 distinct products.
 

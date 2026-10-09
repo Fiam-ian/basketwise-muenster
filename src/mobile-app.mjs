@@ -1,4 +1,5 @@
 import { parseAppReport, isNativeReport, APP_REPORT_LIMIT } from './native-app-data.mjs';
+import { nativePriceDisplay } from './native-price-display.mjs';
 import { foodIcon } from './food-icons.mjs';
 import { buildProductPicker, searchPickerProducts, addPickedProduct, changePickedQuantity, pickedBasketCoverage } from './product-picker.mjs';
 import { parseOfferView, OFFER_VIEW_MAX_BYTES, isOfferDate } from './offer-view.mjs';
@@ -31,7 +32,20 @@ function detail(product) {
   for (const listing of product.listings) {
     const card = el('section', undefined, 'store-card');
     if (product.native) {
-      card.append(el('h3', listing.storeName), el('p', listing.channelLabel), el('p', `${money.format(listing.candidate.priceCents / 100)} captured · ${listing.retrievedAt.slice(0, 10)}`), el('p', 'Validity and Pfand unreviewed; no checkout total.'), el('p', listing.candidate.priceConflicted ? 'Conflicting source prices; excluded from comparison.' : 'Price not verified for checkout.'), el('p', [...(listing.candidate.flagsDisplay ?? []), listing.candidate.priceFootnoteDisplay ?? '', listing.candidate.unitPriceDisplay ?? ''].filter(Boolean).join(' · ')));
+      const display = nativePriceDisplay(listing.candidate, listing.priceChannel);
+      if (listing.priceChannel === 'lidl_app_guest_offers') {
+        card.append(el('h3', listing.storeName), el('p', listing.channelLabel), el('p', display.primaryCents == null ? display.primaryLabel : `${display.primaryLabel}: ${money.format(display.primaryCents / 100)}`));
+        if (display.loyaltyCents != null) card.append(el('p', `With Lidl Plus: ${money.format(display.loyaltyCents / 100)} · membership conditions unreviewed.`));
+        card.append(el('p', 'Captured offer; pack, dates and Pfand need checking. No checkout total.'));
+        const source = el('details'); source.append(el('summary', 'Offer conditions & source'));
+        if (display.referenceCents != null) source.append(el('p', `Reference amount: ${money.format(display.referenceCents / 100)} · not an ordinary offer amount.`));
+        if (listing.candidate.priceAndPackDisplay) source.append(el('p', `Recorded price and pack conditions: ${listing.candidate.priceAndPackDisplay}`));
+        if (listing.candidate.validityDisplay) source.append(el('p', `Recorded period (year unreviewed): ${listing.candidate.validityDisplay}`));
+        source.append(el('p', `Captured ${listing.retrievedAt.slice(0, 10)}`), el('p', 'Selected branch is a capture-session context; per-product applicability is unverified.'));
+        card.append(source);
+      } else {
+        card.append(el('h3', listing.storeName), el('p', listing.channelLabel), el('p', display.primaryCents == null ? display.primaryLabel : `${display.primaryLabel}: ${money.format(display.primaryCents / 100)}`), el('p', `Captured ${listing.retrievedAt.slice(0, 10)}`), el('p', 'Validity and Pfand unreviewed; no checkout total.'), el('p', listing.candidate.priceConflicted ? 'Conflicting source prices; excluded from comparison.' : 'Price not verified for checkout.'), el('p', [...(listing.candidate.flagsDisplay ?? []), listing.candidate.priceFootnoteDisplay ?? '', listing.candidate.unitPriceDisplay ?? ''].filter(Boolean).join(' · ')));
+      }
       if (listing.priceChannel === 'pickup') card.append(el('p', 'Pickup branch is a capture-session assertion; product screens do not repeat its header.'));
       content.append(card); continue;
     }
@@ -57,7 +71,13 @@ function renderProducts() {
   for (const product of matches) {
     const card = el('article', undefined, 'product-card'), open = el('button', undefined, 'product-open'); open.type = 'button'; open.setAttribute('aria-label', `View ${product.name}`);
     const art = artFor(product, `product-art art-${product.category}`); art.setAttribute('aria-hidden', 'true'); open.append(art, el('h3', product.name), el('p', packLabel(product), 'product-meta')); open.addEventListener('click', () => detail(product)); card.append(open);
-    const foot = el('div', undefined, 'product-foot'), price = el('div'); price.append(el('span', money.format(product.listings[0].candidate.priceCents / 100), 'price'), el('p', product.native ? product.listings[0].channelLabel : 'Advertised price', 'price-note'), el('p', `Captured ${product.listings[0].retrievedAt.slice(0, 10)}`, 'price-note')); foot.append(price);
+    const listing = product.listings[0], display = nativePriceDisplay(listing.candidate, listing.priceChannel);
+    const foot = el('div', undefined, 'product-foot'), price = el('div'); price.append(el('span', display.primaryCents == null ? display.primaryLabel : money.format(display.primaryCents / 100), 'price'), el('p', product.native ? listing.channelLabel : 'Advertised price', 'price-note'));
+    if (listing.priceChannel === 'lidl_app_guest_offers') {
+      if (display.primaryCents != null) price.append(el('p', display.primaryLabel, 'price-note'));
+      if (display.loyaltyCents != null) price.append(el('p', `With Lidl Plus: ${money.format(display.loyaltyCents / 100)}`, 'price-note'));
+    }
+    price.append(el('p', `Captured ${listing.retrievedAt.slice(0, 10)}`, 'price-note')); foot.append(price);
     const button = el('button', '+', 'add-button'); button.type = 'button'; button.setAttribute('aria-label', `Add ${product.name} to basket`); button.addEventListener('click', () => add(product)); foot.append(button); card.append(foot);
     const count = basket.find(line => line.product.id === product.id)?.count;
     if (count) card.append(el('p', `${count} in your basket`, 'selected-note'));

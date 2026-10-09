@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 const root = new URL('../', import.meta.url);
 const names = ['offer-view-v2.json', 'aaseemarkt-offer-view-v1.json', 'aaseemarkt-primary-offer-view-v1.json',
   'rewe-pickup-milk-candidates-v2.json', ...['eier', 'tomaten', 'nudeln', 'haferflocken', 'wasser'].map(query => `rewe-pickup-${query}-candidates-v1.json`),
-  ...['milch', 'eier', 'tomaten', 'nudeln', 'haferflocken', 'wasser'].map(query => `aldi-native-${query}-candidates-v1.json`)];
+  ...['milch', 'eier', 'tomaten', 'nudeln', 'haferflocken', 'wasser'].map(query => `aldi-native-${query}-candidates-v1.json`),
+  'lidl-native-offer-candidates-v1.json'];
 const available = [];
 for (const name of names) {
   try { await access(new URL('local-data/' + name, root)); available.push(name); }

@@ -136,3 +136,13 @@ branch operator applicability, first-order uncertainty and transport-box count
 explicitly; preserve conflicting exact thresholds. A new account does not certify
 promotional eligibility. An official ALDI address and a store-select button do
 not link unmapped Android prices to that branch without a successful selection.
+
+## Lidl offer display — 9 October 2026
+
+Allow exact captured Lidl offers into search and basket selection while keeping
+canonical checkout prices null. Ordinary, membership and reference amount roles
+remain separate; missing ordinary amounts cannot fall back to membership or
+reference prices. Raw pack/variant conditions and yearless periods distinguish
+selection identities. Show extended conditions and source context in expandable
+details. The bounded sample is neither full inventory nor verified grocery
+coverage, and supplies no stock, dated validity or cheapest-basket ranking.

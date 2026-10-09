@@ -1,4 +1,5 @@
 import { parseOfferView, OFFER_VIEW_MAX_BYTES, isOfferDate } from './offer-view.mjs';
+import { parseLidlAppReport } from './lidl-app-data.mjs';
 export const APP_REPORT_LIMIT = 16;
 const fail = () => { throw new Error('Unsupported native catalogue report.'); };
 const text = (value, max = 500) => { if (typeof value !== 'string' || !value.trim() || value.length > max || /[\u0000-\u001f]/.test(value)) fail(); return value; };
@@ -9,6 +10,7 @@ const branchDisplay = 'Abholen | Metzer Str. 62-64, 48151 Münster / Geist';
 export function parseNativeAppReport(input) {
   if (typeof input !== 'string' || new TextEncoder().encode(input).length > OFFER_VIEW_MAX_BYTES) fail();
   let report; try { report = JSON.parse(input); } catch { fail(); }
+  if (report?.mode === 'lidl_app_offer_candidates') return parseLidlAppReport(input);
   const aldi = report?.mode === 'aldi_app_candidates';
   if (report?.schemaVersion !== 1 || (!aldi && report?.mode !== 'android_pickup_candidates') || report.package !== (aldi ? 'de.aldiNord.android' : 'de.rewe.app.mobile') || report.priceChannel !== (aldi ? 'aldi_app_unmapped_branch' : 'pickup')) fail();
   if (report.validFrom !== null || report.validTo !== null || report.stockVerified !== false || report.catalogueComplete !== false || report.branchApplicabilityVerified !== false) fail();
@@ -35,13 +37,14 @@ export function parseNativeAppReport(input) {
 }
 export function parseAppReport(input) {
   let mode; try { mode = JSON.parse(input)?.mode; } catch { fail(); }
-  if (['aldi_app_candidates', 'android_pickup_candidates'].includes(mode)) return parseNativeAppReport(input);
+  if (['aldi_app_candidates', 'android_pickup_candidates', 'lidl_app_offer_candidates'].includes(mode)) return parseNativeAppReport(input);
   // The existing leaflet allowlist projection omits mode; restore only its known schema.
   const report = JSON.parse(input);
   if (mode === undefined && report?.offerViewVersion === 1) return parseOfferView(JSON.stringify({ ...report, mode: 'advertised_candidates' }));
   return parseOfferView(input);
 }
-export const isNativeReport = report => ['aldi_app_candidates', 'android_pickup_candidates'].includes(report?.mode);
+export const isNativeReport = report => ['aldi_app_candidates', 'android_pickup_candidates', 'lidl_app_offer_candidates'].includes(report?.mode);
 export function nativeSourceLabel(report, product) {
+  if (report.priceChannel === 'lidl_app_guest_offers') return 'Lidl app offers · conditions unreviewed';
   return report.priceChannel === 'pickup' ? 'REWE pickup' : product?.nativeListingKind === 'promotion' ? 'ALDI app promotion · branch unverified' : 'ALDI app assortment · branch unverified';
 }

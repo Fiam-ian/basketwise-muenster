@@ -132,7 +132,7 @@ Android verification update: the first headless trial showed Google's boot scree
 
 KVM correction: the native WSL check finds /dev/kvm and loaded kvm/kvm_intel modules. The restricted filesystem view hid the device in the initial check. The actual user lacks group-kvm permission; opening it read/write returns PermissionError. Sudo requires local authentication, so the user was asked to run sudo usermod -aG kvm chava. Accelerated startup is prepared through sg kvm and remains pending that result. The third software trial also exited139; no emulator remains running. Do not repeat the earlier claim that this WSL kernel has no KVM. Installation and source/app verification are complete; usable Android boot and retailer access remain unverified.
 
-Accelerated verification completed after the user added chava to kvm: accel-check0, KVMAPI12 and VM creation succeeded. Android boot completed in roughly49seconds with ADBonline/sys.boot_completed1. Actual Android Chrome83 opened the app via ADBreverse localhost8013, displayed5products, and merged two milk selections into one basket line/count2 with both branches. Older DOM/string APIs and viewport/flex spacing were adjusted for this browser. No Google/retailer account was used. A visible KVM/software-rendered window trial is underway; official retailer installation/access remains next.
+Accelerated verification completed after the user added chava to kvm: accel-check0, KVMAPI12 and VM creation succeeded. Android boot completed in roughly49seconds with ADBonline/sys.boot_completed1. Actual Android Chrome83 opened the app via ADBreverse localhost8013, displayed5products, and merged two milk selections into one basket line/count 2 with both branches. Older DOM/string APIs and viewport/flex spacing were adjusted for this browser. No Google/retailer account was used. A visible KVM/software-rendered window trial is underway; official retailer installation/access remains next.
 
 Visible Android verification completed too: the WSLg emulator window is mapped, Android boot=1 and ADBonline. The working KVM/software backend remains running; the private local app bridge is restored. REWE's official Play entry is open and requires Google sign-in before installation. User completion on the emulator's own surface is pending; no account credentials were requested or captured. Added run-android-emulator.sh for the verified accelerated configuration. Current source/runtime checks:190tests and desktop/mobile/actualAndroid app interactions pass.
 
@@ -318,3 +318,27 @@ location permission, reservation or order was introduced.
 The integrated slice passes 211 Node and 29 Python tests. Public source contains
 the policy diagnostic, synthetic fixtures and sanitized decisions; raw quotes,
 ALDI details, account state and private annotations stay ignored.
+
+## Lidl offers in the primary app — 9 October 2026
+
+Connected the retained 37 Lidl guest offer records to search and exact product
+selection. The local pilot now loads 16 explicitly named reports and 142 distinct
+selectable listings. The bounded Lidl sample has no clear milk/egg/dry-pasta
+matches and includes nonfood products; no staple coverage or category is inferred.
+The retained Münster-Friedrich-Ebert-Straße branch remains session context.
+
+The display projection strips source filenames/account extras and keeps ordinary,
+Lidl Plus and reference amounts distinct. Missing ordinary prices render as
+“Price needs review”; canonical prices stay null. Exact identity includes raw
+variant/pack conditions and recorded periods, which remain year-unreviewed.
+Expanded conditions/source details reduce clutter. New modules are served and
+cached as public code; private reports and baskets remain uncached/in memory.
+
+Chromium checks passed at 390 px mobile and 1280 px desktop: 142 listings, product
+search, ordinary/Plus separation, missing ordinary price, expandable reference/
+pack/period details, selection/increment, source clearing preserving count 2,
+no overflow and no browser errors. Local/session storage stayed empty; service
+worker caches contain 14 public shell paths only. Updated the isolated native
+CLI test fixture to include its new parser dependency. The bounded council review
+found no blocker. Final 228 Node and 29 Python tests pass. Public source updates
+contain only code, synthetic tests and sanitized documentation.

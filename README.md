@@ -2,7 +2,7 @@
 
 A local, installable grocery app prototype with product search, catalogue cards,
 a basket and store screens. The primary app displays private captured branch
-advertisements when configured; its catalogue is partial and does not yet
+advertisements and native app listings when configured; its catalogue is partial and does not yet
 compute real basket totals. The separate optimizer demo uses **fictional shops
 and synthetic prices**. Neither supplies live stock or verified walking routes.
 

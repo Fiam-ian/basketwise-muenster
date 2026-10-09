@@ -9,7 +9,7 @@ const assets = new Map([
   ['/offers.html', ['offers.html', 'text/html; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
   ['/favicon.svg', ['favicon.svg', 'image/svg+xml']],
-  ...['app', 'contracts', 'demo-data', 'optimizer', 'open-prices', 'coverage', 'audit-view', 'offer-view', 'offers-app', 'retailer-source', 'shopping-list', 'mobile-app', 'product-picker', 'food-icons', 'native-app-data'].map(name =>
+  ...['app', 'contracts', 'demo-data', 'optimizer', 'open-prices', 'coverage', 'audit-view', 'offer-view', 'offers-app', 'retailer-source', 'shopping-list', 'mobile-app', 'product-picker', 'food-icons', 'native-app-data', 'lidl-app-data', 'native-price-display'].map(name =>
     ['/src/' + name + '.mjs', ['src/' + name + '.mjs', 'text/javascript; charset=utf-8']])
 ]);
 const port = Number(process.env.PORT ?? 8000);

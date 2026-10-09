@@ -16,10 +16,12 @@ export function buildProductPicker(reports) {
   for (const report of parsed) {
     if (isNativeReport(report)) {
       for (const candidate of report.products) {
+        const lidl = report.priceChannel === 'lidl_app_guest_offers';
         const id = JSON.stringify([report.mode, report.branchDisplay ?? null, candidate.nativeListingRef ?? candidate.productName,
-          candidate.productName, candidate.packDisplay, candidate.priceCents, candidate.brandDisplay ?? '', candidate.flagsDisplay ?? [], candidate.priceFootnoteDisplay ?? '', candidate.unitPriceDisplay ?? '', candidate.priceConflicted]);
+          candidate.productName, candidate.packDisplay, candidate.priceCents, candidate.brandDisplay ?? '', candidate.flagsDisplay ?? [], candidate.priceFootnoteDisplay ?? '', candidate.unitPriceDisplay ?? '', candidate.priceConflicted,
+          ...(lidl ? [candidate.normalPriceCents, candidate.lidlPlusPriceCents, candidate.referencePriceCents, candidate.priceAndPackDisplay, candidate.validityDisplay] : [])]);
         if (!products.has(id)) products.set(id, { id, name: candidate.productName, category: 'unclassified', brandDisplay: candidate.brandDisplay ?? '', packDisplay: candidate.packDisplay, native: true, listings: [], comparisonEligible: false, inventoryVerified: false });
-        products.get(id).listings.push({ storeId: report.priceChannel === 'pickup' ? 'rewe-pickup-metzer-context' : 'aldi-unmapped', storeName: report.priceChannel === 'pickup' ? 'REWE pickup · Metzer Str. 62–64' : 'ALDI Nord · branch unverified', channelLabel: nativeSourceLabel(report, candidate), priceChannel: report.priceChannel, validFrom: null, validTo: null, retrievedAt: candidate.evidence.reduce((latest, source) => !latest || Date.parse(source.retrievedAt) > Date.parse(latest) ? source.retrievedAt : latest, ''), candidate, branchApplicabilityVerified: false });
+        products.get(id).listings.push({ storeId: lidl ? 'lidl-friedrich-ebert-context' : report.priceChannel === 'pickup' ? 'rewe-pickup-metzer-context' : 'aldi-unmapped', storeName: lidl ? 'Lidl · Münster-Friedrich-Ebert-Straße' : report.priceChannel === 'pickup' ? 'REWE pickup · Metzer Str. 62–64' : 'ALDI Nord · branch unverified', channelLabel: nativeSourceLabel(report, candidate), priceChannel: report.priceChannel, validFrom: null, validTo: null, retrievedAt: candidate.evidence.reduce((latest, source) => !latest || Date.parse(source.retrievedAt) > Date.parse(latest) ? source.retrievedAt : latest, ''), candidate, branchApplicabilityVerified: false });
       }
       continue;
     }
