@@ -105,3 +105,17 @@ distinct. Bounds are 16 reports and 300 distinct products. Clearing source repor
 must preserve the user's in-memory basket. Private captures are never published
 or service-worker cached. Lidl offer records remain a separate review queue while
 normal/reference/loyalty price roles and yearless dates are unresolved.
+
+## Native price review and retailer verification — 9 October 2026
+
+Treat the first exact-product native review as a hash-bound private diagnostic,
+with explicit sample requests and no checkout arithmetic or rankings. Retain
+fresh product-detail annotations separately from earlier query reports. Retailer
+article references are listing identities, not canonical cross-retailer products.
+Manual flags cannot replace structured evidence for deposits, conditions, branch
+applicability, dates/observation policy or service charges.
+
+Stop a retailer verification route when it rejects the device; account submission
+and code entry are not successful login. Supported web-account entry may be checked
+normally, but HTTP denial also stops that route. Preserve the actual failed status
+without inventing account success or authenticated catalogue coverage.

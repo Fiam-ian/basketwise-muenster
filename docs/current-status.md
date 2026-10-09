@@ -213,7 +213,7 @@ establishes neither inventory nor price applicability.
 
 The primary app now accepts channel-aware REWE pickup and ALDI native projections
 alongside the existing leaflet reports. Fifteen retained reports yield 105 distinct
-selectable listings (50 REWE,50 ALDI,fiveleaflet products). Search matches recorded
+selectable listings (50 REWE,50 ALDI,five leaflet products). Search matches recorded
 names, brands and pack wording. Native search results remain unclassified, with
 no inferred fat percentage, category or equivalent alternatives. Details disclose
 channel, capture date, source conflicts, unknown applicability/validity/Pfand.
@@ -244,3 +244,37 @@ basket add/increment, clearing source data while preserving count, no horizontal
 overflow, zero console errors, empty local/session storage, and code-only cache
 contents. The browser uncovered a leaflet projection round-trip issue; fixed it
 and added a mixed API/client regression. Final 196 Node and 18 Python tests pass.
+
+## Netto registration and exact REWE detail review — 9 October 2026
+
+Netto registration submitted using the designated private email and a unique
+replacement password. Required terms consent was enabled and newsletter consent
+left off. Native Chrome exposes its styled checkboxes as non-checkable controls;
+rendered switches were inspected separately. Email-code submission reached a
+retailer error: account confirmation failed and registration should be attempted
+from another device. Registration remains incomplete; private credential status
+records the rejection. Ordinary supported desktop access to netto-online.de also
+returned 403, so that route was stopped. No authentication control was bypassed,
+PAYBACK account connected or payment method enrolled.
+
+A generated, still-unregistered password appeared in a diagnostic browser
+accessibility dump. It was replaced before submission, its temporary raw snapshot
+removed and the diagnostic inspection filter tightened to exclude credential
+controls/values and account-form persistence. No credentials or verification code
+were added to source. Added verify-netto-email.py for hidden local code entry,
+with wrong-origin/form/layout guards and device-dump cleanup.
+
+Captured fresh details for three exact REWE pickup selections: milk, eggs and dry
+pasta. Six source screens expose three distinct retailer article references,
+literal packs and product descriptions; displayed amounts match the selected
+older reports. Separate pickup headers were rechecked before/after egg/pasta
+capture; milk was opened first in that same retained pickup session. Applicability
+remains a capture-session assertion. All bytes, hashes and literal annotations
+stay private; no cart additions, slot reservations or purchases were made.
+
+Added a hash-bound native-price review draft/audit CLI. The actual three-line
+sample request selects all three records while retaining six unresolved gate
+requirements per selection and no totals/ranking. Sample demands are diagnostic,
+not the user's basket. Council review found and corrected linked-root/input path
+handling and pre-read report bounds; unsupported pack/deposit edits are rejected.
+The native suite passes 205 Node tests and 21 Python tests. See price-review-gaps.md.
