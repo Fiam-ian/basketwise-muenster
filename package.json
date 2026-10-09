@@ -20,7 +20,10 @@
     "test:android-catalogue": "python3 -m unittest discover -s tests/python",
     "delivery:capture": "node scripts/capture-wolt-listings.mjs",
     "shops:discover": "node scripts/discover-shops.mjs",
-    "catalogue:aldi:extract": "python3 scripts/extract-aldi-app-catalogue.py"
+    "catalogue:aldi:extract": "python3 scripts/extract-aldi-app-catalogue.py",
+    "app:pilot": "node scripts/run-pilot-app.mjs",
+    "catalogue:lidl:capture": "python3 scripts/capture-lidl-app-offers.py",
+    "catalogue:lidl:extract": "python3 scripts/extract-lidl-app-offers.py"
   },
   "engines": {
     "node": ">=22"

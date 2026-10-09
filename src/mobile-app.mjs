@@ -1,3 +1,4 @@
+import { parseAppReport, isNativeReport, APP_REPORT_LIMIT } from './native-app-data.mjs';
 import { foodIcon } from './food-icons.mjs';
 import { buildProductPicker, searchPickerProducts, addPickedProduct, changePickedQuantity, pickedBasketCoverage } from './product-picker.mjs';
 import { parseOfferView, OFFER_VIEW_MAX_BYTES, isOfferDate } from './offer-view.mjs';
@@ -5,12 +6,12 @@ const $ = id => document.getElementById(id);
 const el = (tag, text, className) => { const node = document.createElement(tag); if (text != null) node.textContent = text; if (className) node.className = className; return node; };
 const replace = (element, ...children) => { element.textContent = ''; element.append(...children); };
 const money = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
-const artFor = (product, className) => { const art = el('div', undefined, className); art.append(foodIcon(product.category)); return art; };
-const categories = [['', 'All'], ['milk', 'Milk'], ['pasta', 'Pasta'], ['tomatoes', 'Produce'], ['water', 'Drinks'], ['eggs', 'Eggs'], ['oats', 'Breakfast']];
+const artFor = (product, className) => { const art = el('div', undefined, className); if (product.native) art.append(el('span', '▧')); else art.append(foodIcon(product.category)); return art; };
+const categories = [['', 'All'], ['unclassified', 'App catalogue'], ['milk', 'Milk'], ['pasta', 'Pasta'], ['tomatoes', 'Produce'], ['water', 'Drinks'], ['eggs', 'Eggs'], ['oats', 'Breakfast']];
 let reports = [], products = [], basket = [], category = '', generation = 0, installPrompt;
 const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
 $('app-shopping-date').value = ['year', 'month', 'day'].map(type => parts.find(part => part.type === type).value).join('-');
-const packLabel = product => product.packAmbiguity ? 'Pack size awaiting review' : `${product.packQuantity >= 1000 && ['g', 'ml'].includes(product.unit) ? product.packQuantity / 1000 : product.packQuantity} ${product.packQuantity >= 1000 && product.unit === 'ml' ? 'L' : product.packQuantity >= 1000 && product.unit === 'g' ? 'kg' : product.unit === 'count' ? 'pieces' : product.unit}${product.fatBasisPoints == null ? '' : ` · ${product.fatBasisPoints / 100}% fat`}`;
+const packLabel = product => product.native ? `${product.brandDisplay ? product.brandDisplay + ' · ' : ''}${product.packDisplay}` : product.packAmbiguity ? 'Pack size awaiting review' : `${product.packQuantity >= 1000 && ['g', 'ml'].includes(product.unit) ? product.packQuantity / 1000 : product.packQuantity} ${product.packQuantity >= 1000 && product.unit === 'ml' ? 'L' : product.packQuantity >= 1000 && product.unit === 'g' ? 'kg' : product.unit === 'count' ? 'pieces' : product.unit}${product.fatBasisPoints == null ? '' : ` · ${product.fatBasisPoints / 100}% fat`}`;
 function navigate(screen) {
   for (const name of ['explore', 'basket', 'stores']) $('screen-' + name).hidden = name !== screen;
   for (const button of document.querySelectorAll('[data-screen]')) { if (button.dataset.screen === screen) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current'); }
@@ -26,9 +27,15 @@ function add(product) {
 function detail(product) {
   const content = $('detail-content'); replace(content, el('h2', product.name), artFor(product, `product-art art-${product.category}`), el('p', packLabel(product), 'product-meta'));
   const button = el('button', 'Add to basket', 'primary'); button.type = 'button'; button.addEventListener('click', () => { add(product); $('product-detail').close(); }); content.append(button);
-  content.append(el('p', 'Captured advertisement. Stock and equivalent cheaper alternatives are not verified.', 'muted'));
+  content.append(el('p', product.native ? 'Captured app listing. Branch applicability, stock and equivalent alternatives are unverified.' : 'Captured advertisement. Stock and equivalent cheaper alternatives are not verified.', 'muted'));
   for (const listing of product.listings) {
-    const card = el('section', undefined, 'store-card'); card.append(el('h3', listing.storeName), el('p', `${money.format(listing.candidate.priceCents / 100)} advertised · ${listing.validFrom} – ${listing.validTo}`), el('p', listing.candidate.conditions));
+    const card = el('section', undefined, 'store-card');
+    if (product.native) {
+      card.append(el('h3', listing.storeName), el('p', listing.channelLabel), el('p', `${money.format(listing.candidate.priceCents / 100)} captured · ${listing.retrievedAt.slice(0, 10)}`), el('p', 'Validity and Pfand unreviewed; no checkout total.'), el('p', listing.candidate.priceConflicted ? 'Conflicting source prices; excluded from comparison.' : 'Price not verified for checkout.'), el('p', [...(listing.candidate.flagsDisplay ?? []), listing.candidate.priceFootnoteDisplay ?? '', listing.candidate.unitPriceDisplay ?? ''].filter(Boolean).join(' · ')));
+      if (listing.priceChannel === 'pickup') card.append(el('p', 'Pickup branch is a capture-session assertion; product screens do not repeat its header.'));
+      content.append(card); continue;
+    }
+    card.append(el('h3', listing.storeName), el('p', `${money.format(listing.candidate.priceCents / 100)} advertised · ${listing.validFrom} – ${listing.validTo}`), el('p', listing.candidate.conditions));
     const details = el('details'), summary = el('summary', 'Source & outstanding checks'); details.append(summary,
       el('p', listing.candidate.depositCents == null ? 'Pfand unknown; checkout total unavailable.' : `Recorded Pfand: ${money.format(listing.candidate.depositCents / 100)}; review pending.`),
       el('p', listing.candidate.packAmbiguity ?? 'Priced pack and product equivalence require review.'),
@@ -45,12 +52,12 @@ for (const [value, label] of categories) {
 function renderProducts() {
   const matches = searchPickerProducts(products, $('product-search').value, category);
   $('catalogue-count').textContent = `${matches.length} ${matches.length === 1 ? 'product' : 'products'}`;
-  $('catalogue-note').textContent = reports.length ? `Partial leaflet catalogue · ${new Set(reports.map(report => report.storeId)).size} branches · captured offers, not live stock.` : 'No local product data loaded. Open Stores → Local data to load reports.';
+  $('catalogue-note').textContent = reports.length ? 'Partial captured catalogue · app channels and leaflet offers kept separate · no verified stock or checkout totals.' : 'No local product data loaded. Open Stores → Local data to load reports.';
   replace($('product-grid')); $('catalogue-empty').hidden = matches.length > 0;
   for (const product of matches) {
     const card = el('article', undefined, 'product-card'), open = el('button', undefined, 'product-open'); open.type = 'button'; open.setAttribute('aria-label', `View ${product.name}`);
     const art = artFor(product, `product-art art-${product.category}`); art.setAttribute('aria-hidden', 'true'); open.append(art, el('h3', product.name), el('p', packLabel(product), 'product-meta')); open.addEventListener('click', () => detail(product)); card.append(open);
-    const foot = el('div', undefined, 'product-foot'), price = el('div'); price.append(el('span', money.format(product.listings[0].candidate.priceCents / 100), 'price'), el('p', 'Advertised price', 'price-note')); foot.append(price);
+    const foot = el('div', undefined, 'product-foot'), price = el('div'); price.append(el('span', money.format(product.listings[0].candidate.priceCents / 100), 'price'), el('p', product.native ? product.listings[0].channelLabel : 'Advertised price', 'price-note'), el('p', `Captured ${product.listings[0].retrievedAt.slice(0, 10)}`, 'price-note')); foot.append(price);
     const button = el('button', '+', 'add-button'); button.type = 'button'; button.setAttribute('aria-label', `Add ${product.name} to basket`); button.addEventListener('click', () => add(product)); foot.append(button); card.append(foot);
     const count = basket.find(line => line.product.id === product.id)?.count;
     if (count) card.append(el('p', `${count} in your basket`, 'selected-note'));
@@ -78,27 +85,29 @@ function renderBasket() {
   const coverage = pickedBasketCoverage(reports, basket, $('app-shopping-date').value);
   if (!coverage.length) $('basket-branches').append(el('p', 'Load branch reports to check your selections.'));
   for (const branch of coverage) {
-    const card = el('section', undefined, 'store-card'); card.append(el('h3', branch.storeName), el('p', `${branch.capturedLines} of ${branch.requestedLines} selected products captured here · ${branch.inPeriodLines} in recorded period.`), el('span', 'Checkout evidence pending', 'store-tag')); $('basket-branches').append(card);
+    const card = el('section', undefined, 'store-card'); card.append(el('h3', branch.storeName), el('p', branch.native ? `${branch.capturedLines} of ${branch.requestedLines} selected products in this app context · applicability and validity unverified.` : `${branch.capturedLines} of ${branch.requestedLines} selected products captured here · ${branch.inPeriodLines} in recorded period.`), el('span', 'Checkout evidence pending', 'store-tag')); $('basket-branches').append(card);
   }
 }
 function renderStores() {
   replace($('store-list'));
-  const branches = [...new Map(reports.map(report => [report.storeId, report])).values()];
+  const branches = [...new Map(reports.filter(report => !isNativeReport(report)).map(report => [report.storeId, report])).values()];
   for (const branch of branches) {
     const card = el('article', undefined, 'store-card'); card.append(el('h3', branch.storeName), el('p', branch.address), el('span', 'Captured leaflet offers', 'store-tag')); $('store-list').append(card);
   }
-  for (const name of ['REWE Geiststraße', 'Netto Weseler Straße']) { const card = el('article', undefined, 'store-card'); card.append(el('h3', name), el('p', 'App-source access trial pending'), el('span', 'No catalogue connected', 'store-tag')); $('store-list').append(card); }
+  for (const branch of [...new Map(products.filter(product => product.native).flatMap(product => product.listings.map(listing => [listing.storeId, listing]))).values()]) { const card = el('article', undefined, 'store-card'); card.append(el('h3', branch.storeName), el('p', branch.priceChannel === 'aldi_app_unmapped_branch' ? 'ALDI app catalogue · assortment and promotion listings' : branch.channelLabel), el('span', 'Branch applicability unverified', 'store-tag')); $('store-list').append(card); }
+  for (const name of ['Netto Weseler Straße']) { const card = el('article', undefined, 'store-card'); card.append(el('h3', name), el('p', 'App-source access trial pending'), el('span', 'No catalogue connected', 'store-tag')); $('store-list').append(card); }
 }
 function accept(next) { const catalogue = buildProductPicker(next); reports = next; products = catalogue; renderProducts(); renderBasket(); renderStores(); }
 async function loadCatalogue() {
   const token = ++generation;
-  try { const response = await fetch('./api/catalogue', { cache: 'no-store' }); if (!response.ok) throw Error(); const payload = await response.json(); if (!Array.isArray(payload.reports)) throw Error(); if (token !== generation) return; const next = payload.reports.map(report => parseOfferView(JSON.stringify({ ...report, mode: 'advertised_candidates' }))); accept(next); $('app-status').textContent = next.length ? 'Local catalogue loaded.' : 'No branch reports configured.'; }
+  try { const response = await fetch('./api/catalogue', { cache: 'no-store' }); if (!response.ok) throw Error(); const payload = await response.json(); if (!Array.isArray(payload.reports)) throw Error(); if (token !== generation) return; const next = payload.reports.map(report => parseAppReport(JSON.stringify(report))); accept(next); $('app-status').textContent = next.length ? 'Local catalogue loaded.' : 'No branch reports configured.'; }
   catch { if (token !== generation) return; accept([]); $('app-status').textContent = 'Local source unavailable. Load reports in Stores, or reconnect to the local server.'; }
 }
 $('reload-catalogue').addEventListener('click', loadCatalogue);
+$('clear-catalogue').addEventListener('click', () => { ++generation; accept([]); $('app-report-files').value = ''; $('app-status').textContent = 'Catalogue cleared; basket selections preserved.'; });
 $('app-report-files').addEventListener('change', async event => {
   const token = ++generation;
-  try { const files = [...event.target.files]; if (!files.length) return; if (files.length > 3 || files.some(file => file.size > OFFER_VIEW_MAX_BYTES)) throw Error(); const next = await Promise.all(files.map(async file => parseOfferView(await file.text()))); if (token !== generation) return; accept(next); $('app-status').textContent = 'Private reports loaded.'; }
+  try { const files = [...event.target.files]; if (!files.length) return; if (files.length > APP_REPORT_LIMIT || files.some(file => file.size > OFFER_VIEW_MAX_BYTES)) throw Error(); const next = await Promise.all(files.map(async file => parseAppReport(await file.text()))); if (token !== generation) return; accept(next); $('app-status').textContent = 'Private reports loaded.'; }
   catch { if (token !== generation) return; $('app-status').textContent = 'Unsupported reports. Existing catalogue and basket preserved.'; }
 });
 $('product-search').addEventListener('input', renderProducts);

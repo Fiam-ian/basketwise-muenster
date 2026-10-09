@@ -208,3 +208,39 @@ branch marker DE5054. Confirmed the ordinary selection dialog and reached guest
 Home/Prospekte/Lidl Plus/Onlineshop/Konto navigation. No account was required for
 this step. Product/price acquisition remains pending; branch selection alone
 establishes neither inventory nor price applicability.
+
+## Searchable native catalogue integration — 9 October 2026
+
+The primary app now accepts channel-aware REWE pickup and ALDI native projections
+alongside the existing leaflet reports. Fifteen retained reports yield 105 distinct
+selectable listings (50 REWE,50 ALDI,fiveleaflet products). Search matches recorded
+names, brands and pack wording. Native search results remain unclassified, with
+no inferred fat percentage, category or equivalent alternatives. Details disclose
+channel, capture date, source conflicts, unknown applicability/validity/Pfand.
+No checkout totals or cheapest-basket rankings are enabled.
+
+Added npm run app:pilot to select the known private report basenames without
+scanning account directories. It starts a loopback app and stays empty in public
+checkouts lacking private data. Ordinary npm run dev retains explicit report
+configuration. Parser/API bounds are 16 reports and 300 distinct products. Private
+fields and filenames are projected away; raw local-data remains inaccessible.
+Clear catalogue preserves basket selections. Service-worker v 3 caches code only.
+
+Lidl guest Meine Filiale offers capture completed at the selected DE5054 context:
+24 screens,37 distinct extracted offer records. Displayed source count 49 is not
+extractor coverage or full inventory. Ordinary, loyalty and reference amounts are
+separate; comparison price remains null. Source snapshots and review report stay
+ignored, outside primary-app integration. No Lidl account was needed.
+
+EDEKA's renewed 48151 manual search still found no markets. Netto's Muenster city
+search succeeded after its earlier postcode error: selected WeselerStr.109,
+48151 Münster, preserving exact address evidence privately. Its milk offer search
+shows five results and app-discount login controls; those results have not been
+projected into product records or prices. No Netto account has yet been created.
+
+Bounded council review found no integration blocker. Real Chromium checks passed
+at 390 px mobile and 1280 px desktop:105 cards, brand search, native detail modal,
+basket add/increment, clearing source data while preserving count, no horizontal
+overflow, zero console errors, empty local/session storage, and code-only cache
+contents. The browser uncovered a leaflet projection round-trip issue; fixed it
+and added a mixed API/client regression. Final 196 Node and 18 Python tests pass.

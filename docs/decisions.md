@@ -93,3 +93,15 @@ cannot supply Münster shelf prices. Keep native listing references distinct fro
 canonical products and preserve promotion conditions without automatic validity
 or deposit inference. EDEKA/Netto location failures do not prove absence of shops
 or products. Raw Android captures and account state remain private and ignored.
+
+## Native catalogue display contract — 9 October 2026
+
+Connect bounded native capture projections to product selection, with explicit
+pickup/ALDI-app channels and capture dates. Keep native search results unclassified
+until category/attribute review; queries do not certify milk, dietary suitability
+or canonical equivalence. Exact captured selections can merge across queries,
+retaining source references, while separate channels and commercial fields remain
+distinct. Bounds are 16 reports and 300 distinct products. Clearing source reports
+must preserve the user's in-memory basket. Private captures are never published
+or service-worker cached. Lidl offer records remain a separate review queue while
+normal/reference/loyalty price roles and yearless dates are unresolved.

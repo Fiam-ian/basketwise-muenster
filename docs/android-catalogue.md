@@ -75,6 +75,60 @@ complete catalogue and comparison eligibility remain unresolved. Retrieval time
 does not establish advertised validity. Pickup fees and service terms remain
 separate from merchandise prices. No order, reservation or payment is made.
 
-The primary app still loads its advertised-leaflet schema only. These pickup
-candidates intentionally do not enter it until channel-aware display and
-selection contracts are added; they never enable checkout rankings directly.
+The primary app now supports these pickup candidates and ALDI Nord app
+candidates alongside leaflet reports. Each card preserves its price channel and
+capture date. App search results stay unclassified; neither the search query nor
+a product name certifies a category or equivalent substitute. All selections
+remain comparison-ineligible and never enable checkout rankings directly.
+
+## ALDI and Lidl continuation
+
+ALDI Nord guest search supplied 50 distinct native references across six queries:
+26 assortment cards and 24 promotions. Its branch remains unmapped. The ALDI
+extractor preserves the primary displayed amount and raw pack/brand/condition
+wording; reference amounts cannot replace it. Search results are not inventory.
+
+Lidl Plus guest offers were captured after selecting Friedrich-Ebert-Straße 17,
+Münster (DE5054). A 24-screen bounded run stopped when the screen repeated,
+projecting 37 distinct offer records. The displayed offer count was 49; this does
+not mean the extractor covered every offer or that all records are groceries.
+The adapter requires the checked Meine Filiale filter, supports the observed
+expanded and collapsed offers headers, and verifies separate branch headers
+before and after. Preserve raw yearless date ranges. Explicit Normalpreis,
+Lidl Plus and reference amounts are separate fields; priceCents stays null.
+These records remain a private review queue outside the primary app.
+
+```sh
+npm run catalogue:lidl:capture -- \
+  --output-dir local-data/lidl-next-capture \
+  --branch-display 'Münster-Friedrich-Ebert-Straße' --screens 30
+npm run catalogue:lidl:extract -- \
+  --capture-dir local-data/lidl-next-capture \
+  --output local-data/lidl-next-candidates.json
+```
+
+The capture command starts from Lidl's selected guest branch and visible bottom
+navigation. It does not register, activate coupons or make purchases. Use new
+output paths; interrupted captures remain preserved.
+
+## Run the searchable private pilot
+
+From prototype, with the project-local Node runtime on PATH:
+
+```sh
+npm run app:pilot
+```
+
+This launcher chooses up to 15 known pilot report basenames when present under
+local-data. It never scans account directories. The actual retained configuration
+loads 105 distinct selections: five leaflet products,50 REWEpickup listings and
+50 ALDIapp listings. A public checkout without these private reports starts empty.
+Use PORT to change the loopback port. General npm run dev remains configurable
+through BASKETWISE_REPORTS, now bounded at 16 reports/300 distinct products.
+
+The API projects allowlisted display metadata only, strips local filenames and
+unrelated account fields, refuses linked or oversized reports and sends no-store.
+The service worker caches public shell modules only. Imported reports and basket
+state remain in memory. Clearing catalogue data preserves selections, with a
+source-unavailable label. Pickup branch context remains an assertion and ALDI
+branch applicability remains unknown. Product selection is not a price match.
